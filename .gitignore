@@ -1,0 +1,6 @@
+Thumbs.db
+.DS_Store
+*.log
+src/root/tiles/
+dist/
+src/stalburg/stalburg-sat.afphoto
