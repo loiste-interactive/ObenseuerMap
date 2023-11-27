@@ -1,7 +1,3 @@
-//walter_tower = new L.marker([0,0], { opacity: 0.9 })
-//.bindPopup('<h2>Walter Tower</h2><img width="200" height="200" src="res/locations/walter.jpg">Headquoters of <a href="https://stalburg.net/Walter_Corporation">Walter Corporation</a>, a company created by <a href="https://stalburg.net/Jeff_Walter">Jeff Walter</a>.<br><span class="location-section">Maps:</span> <a href="https://stalburg.net/Skyscraper">skyscraper</a>',{offset: [0,-12],maxWidth:400,minWidth:400,className:'location',closeButton:false})
-//.addTo(locations).on('click',function(){setHash("walter_tower")});
-
 var objects = [
 	{
 	    id:     'One_Stop_Shop',
