@@ -432,6 +432,7 @@
 		'<br><i><a href="https://stalburg.net/Obenseuer/Characters#Ville_Sk%C3%B6ldgangster">See on the wiki</a></i>'
 	        }
 	    ]
+	},
 	{
 	    id:          'tenement_B',
 	    name:        'Tenement B',
