@@ -1,4 +1,4 @@
-var objects = [
+﻿var objects = [
 	{
 	    id:     'One_Stop_Shop',
 	    name:   'One Stop Shop',
