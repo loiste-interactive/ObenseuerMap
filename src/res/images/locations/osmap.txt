@@ -1,0 +1,162 @@
+{
+    id:     'One_Stop_Shop',
+    name:   'One Stop Shop',
+    icon:   'LM_OneStopShop.png',
+    latlng: [-76,90],
+    image:       'preview_oneStopShop.jpg',
+    description: '<b>One Stop Shop</b> is selling and buying random junk<br><br>Opening hours:<br><b>Monday</b> 08:00-18:00<br><b>Tuesday</b> 08:00-18:00<br>Wednesday</b> 08:00-18:00<br><b>Thursday</b> 08:00-18:00<br><b>Friday</b> 08:00-18:00<br><b>Saturday</b> 10:00-16:00<br><b>Sunday</b> closed<br><br><a href="https://stalburg.net/Obenseuer/Shop_Vendors#One_Stop_Shop">See on the wiki</a>'
+},
+{
+    id:     'players_tenement',
+    name:   'Player\'s Tenement',
+    icon:   'LM_Tenement_Player.png',
+    latlng: [-14,110],
+    image:       'preview_playerment.jpg',
+    description: 'It\'s a 6 story building with additional basement and a roof space, owned by the Player<br><br><a href="https://stalburg.net/Player's_Tenement">See on the wiki</a>'
+},
+{
+    id:          'canal_sauna',
+    name:        'Canal Sauna',
+    icon:        'LM_Sauna_Player.png',
+    latlng:      [-10,132],
+    image:       'preview_canalSauna.jpg',
+    description: 'Player\'s own <b>Sauna<b> adjacent as an extention to the Tenement<br><br><a href="https://stalburg.net/Canal_Sauna">See on the wiki</a>' 
+},
+{
+    id:          'toilets_01',
+    name:        'Bucket Toilet',
+    icon:        'LM_Toilet.png',
+    latlng:      [-14,136],
+    image:       'preview_Toilet01.jpg',
+    description: '<a href="https://stalburg.net/Toilets">See on the wiki</a>' 
+},
+{
+    id:          'toilets_02',
+    name:        'Toilet',
+    icon:        'LM_Toilet.png',
+    latlng:      [-50,97],
+    image:       'preview_Toilet02.jpg',
+    description: '<a href="https://stalburg.net/Toilets">See on the wiki</a>' 
+},
+{
+    id:          'toilets_03',
+    name:        'Toilet',
+    icon:        'LM_Toilet.png',
+    latlng:      [32,-162],
+    image:       'preview_Toilet03.jpg',
+    description: '<a href="https://stalburg.net/Toilets">See on the wiki</a>' 
+},
+{
+    id:     'deekula_a',
+    name:   'Deekula A',
+    icon:   'LM_Tenement_A.png',
+    latlng: [10,12],
+    sublocs: [
+        {
+            name:        '"Tenement Contract Work!"',
+            icon:        'LM_Renovation.png',
+            image:       'preview_dekA_Renovator.jpg',
+            description: 'Low level tenement contract business on the first floor operated by Samuel Jonasson<br><br><a href="https://stalburg.net/Obenseuer/Shop_Vendors#Tenement_Contract_Work!">See on the wiki</a>'
+        },
+        {
+            name:        'Dr. Pena MD',
+            icon:        'LM_Skeida.png',
+            image:       'preview_dekA_Doctor.jpg',
+            description: 'Local doctor on the second floor who can check state of your physical or mental health'
+        },
+        {
+            name:        'Aleksi Kivi',
+            icon:        'LM_NPC.png',
+            image:       'preview_rent_Aleksi.jpg',
+            description: 'A resident needing an apartment to live found on the fifth floor<br><br><a href="https://stalburg.net/Obenseuer/Characters#Aleksi_Kivi">See on the wiki</a>'
+        },
+        {
+            name:        'Osmo Olut vending machine',
+            icon:        'LM_Vending.png',
+            image:       'preview_dekA_Vending.jpg',
+            description: 'Vending machine on the first floor selling Osmo Olut beer<br><br><a href="https://stalburg.net/Obenseuer/Shop_Vendors#Osmo_Olut">See on the wiki</a>'
+        }
+    ] 
+},
+{
+    id:     'deekula_b',
+    name:   'Deekula B',
+    icon:   'LM_Tenement_B.png',
+    latlng: [-33,7],
+    sublocs: [
+        {
+            name:        'Amanda Korhonen',
+            icon:        'LM_NPC.png',
+            image:       'preview_rent_Amanda.jpg',
+            description: 'A resident needing an apartment to live found on the first floor<br><br><a href="https://stalburg.net/Obenseuer/Characters#Amanda_Korhonen">See on the wiki</a>'
+        }
+    ] 
+},
+{
+    id:     'deekula_c',
+    name:   'Deekula C',
+    icon:   'LM_Tenement_C.png',
+    latlng: [-62,2],
+    sublocs: [
+        {
+            name:        '"M&U+00F6belmann Furnitures"',
+            icon:        'LM_Market.png',
+            image:       'preview_Mobelmann.jpg',
+            description: 'Furniture store on the first floor operated by Hank M&U+00F6belmann<br><br><a href="https://stalburg.net/Obenseuer/Shop_Vendors#M%C3%B6belmann_Furnitures">See on the wiki</a>'
+        },
+        {
+            name:        'Svamppatrullen Mushroom Seller',
+            icon:        'LM_Market.png',
+            image:       'preview_svamppatrullen.jpg',
+            description: 'Mushroom seller accessible from the third floor, operated by Svamppatrullen gang\'s Julius &U+00D6berg'<br><br><a href="https://stalburg.net/Obenseuer/Shop_Vendors#Svamppatrullen_Mushroom_Seller">See on the wiki</a>
+        },
+        {
+            name:        'Vivi Bondar',
+            icon:        'LM_NPC.png',
+            image:       'preview_rent_Vivi.jpg',
+            description: 'A resident needing an apartment to live found on the first floor<br><br><a href="https://stalburg.net/Obenseuer/Characters#Vivi_Bondar">See on the wiki</a>'
+        },
+        {
+            name:        '"Ducks! Ducks! Ducks!" vending machine',
+            icon:        'LM_Vending.png',
+            image:       'preview_ducks_Vending.jpg',
+            description: 'Vending machine on the first floor selling rubber ducks<br><br><a href="https://stalburg.net/Obenseuer/Shop_Vendors#Ducks!_Ducks!_Ducks!">See on the wiki</a>'
+        },
+        {
+            name:        '"Cheap Rats for sale" vending machine',
+            icon:        'LM_Vending.png',
+            image:       'preview_rats_Vending.jpg',
+            description: 'Vending machine on the first floor insid storage 11, selling rats<br><br><a href="https://stalburg.net/Obenseuer/Shop_Vendors#Cheap_Rats_for_sale">See on the wiki</a>'
+        },
+        {
+            name:        'Shrooms vending machine',
+            icon:        'LM_Vending.png',
+            image:       'preview_shrooms_dekC.jpg',
+            description: 'Vending machine on the second floor selling green mushrooms<br><br><a href="https://stalburg.net/Obenseuer/Shop_Vendors#Shrooms">See on the wiki</a>'
+        }
+    ] 
+},
+{
+    id:          'vending_drinks',
+    name:        'Moca-cola vending machine',
+    icon:        'LM_Vending.png',
+    latlng:      [-60,-29],
+    image:       'preview_border_Vending.jpg',
+    description: 'Vending machine selling soft drinks<br><br><a href="https://stalburg.net/Obenseuer/Shop_Vendors#Soft_Drinks">See on the wiki</a>' 
+},
+{
+    id:          'vending_drinks',
+    name:        'Osmo Olut vending machine',
+    icon:        'LM_Vending.png',
+    latlng:      [-13,-100],
+    image:       'preview_marketvending.jpg',
+    description: 'Vending machine selling Osmo Olut beer<br><br><a href="https://stalburg.net/Obenseuer/Shop_Vendors#Osmo_Olut">See on the wiki</a>' 
+},
+{
+    id:          'vending_drinks',
+    name:        'Shroom vending machine',
+    icon:        'LM_Vending.png',
+    latlng:      [-27,-132],
+    image:       'preview_alley_Vending.jpg',
+    description: 'Vending machine selling soft drinks<br><br><a href="https://stalburg.net/Obenseuer/Shop_Vendors#Shrooms">See on the wiki</a>' 
+},
