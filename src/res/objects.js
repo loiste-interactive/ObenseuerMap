@@ -356,7 +356,7 @@ var objects = [
 	    name:        'Passport Control',
 	    icon:        'LM_Border.png',
 	    latlng:      [-76,64],
-	    image:       'preview_borderControl.jpg',
+	    image:       'preview_passportControl.jpg',
 	    description: 'One of the regulated passages between Residential and Bazaar district zones<br>' +
 		'<br><i><a href="https://stalburg.net/Passport_Control">See on the wiki</a></i>' 
 	},
@@ -443,7 +443,7 @@ var objects = [
 	        {
 	            name:        'Bergmann Water Tunnels',
 	            icon:        'LM_Unknown.png',
-	            image:       'preview_bergmann.jpg',
+	            image:       'preview_Bergmann.jpg',
 	            description: 'A maze of water and maintanance tunnels connecting various places beneath Residential district zone<br>' +
 				'<br><i><a href="https://stalburg.net/Obenseuer/Bergmann_Water_Tunnels">See on the wiki</a></i>'
 	        }
@@ -632,7 +632,7 @@ var objects = [
 	    name:        'Jarmo Pettinen',
 	    icon:        'LM_NPC.png',
 	    latlng:      [-14,-33],
-	    image:       'preview_rent_Jarmo.jpg',
+	    image:       'preview_rent_Jermo.jpg',
 	    description: 'A resident needing an apartment to live found at the Trade Road campsite<br>' +
 		'<br><i><a href="https://stalburg.net/Obenseuer/Characters#Jarmo_Pettinen">See on the wiki</a></i>'
 	},
@@ -641,7 +641,7 @@ var objects = [
 	    name:        'Agnes and Ulrik Takala',
 	    icon:        'LM_NPC.png',
 	    latlng:      [-1,-37],
-	    image:       'preview_rent_Jarmo.jpg',
+	    image:       'preview_rent_Agnes.jpg',
 	    description: 'A couple needing an apartment to live found at the Trade Road campsite<br>' +
 		'<br><i><a href="https://stalburg.net/Obenseuer/Characters#Agnes_and_Ulrik_Takala">See on the wiki</a></i>'
 	},
@@ -650,7 +650,7 @@ var objects = [
 	    name:        'Martta Lapinjoki and Jaska Virtanen',
 	    icon:        'LM_NPC.png',
 	    latlng:      [-71,108],
-	    image:       'preview_rent_Jarmo.jpg',
+	    image:       'preview_rent_Martta.jpg',
 	    description: 'A couple needing an apartment to live found at the campsite near Lot Shacks<br>' +
 		'<br><i><a href="https://stalburg.net/Obenseuer/Characters#Martta_Lapinjoki_and_Jaska_Virtanen">See on the wiki</a></i>'
 	},
