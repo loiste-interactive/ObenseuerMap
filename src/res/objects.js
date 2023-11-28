@@ -42,7 +42,7 @@ var objects = [
 	    icon:        'LM_Sauna_Player.png',
 	    latlng:      [-10,132],
 	    image:       'preview_canalSauna.jpg',
-	    description: 'Player\'s own <b>Sauna<b> adjacent as an extention to the Tenement<br>' +
+	    description: 'Player\'s own <b>Sauna</b> adjacent as an extention to the Tenement<br>' +
 		'<br><i><a href="https://stalburg.net/Canal_Sauna">See on the wiki</a></i>' 
 	},
 	{
