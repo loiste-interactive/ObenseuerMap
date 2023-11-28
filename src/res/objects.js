@@ -413,13 +413,25 @@
 	},
 	{
 	    id:          'speakeasy',
-	    name:        'Speakeasy Bar',
+	    name:        'Tenement A Basement',
 	    icon:        'LM_Bar.png',
 	    latlng:      [28,-142],
-	    image:       'preview_Speakeasy.jpg',
-	    description: 'Local bar run by Pentti Penttil%C3%A4, located in Tenement A Basement<br>' +
+	    sublocs: [
+	        {
+	            name:        'Speakeasy Bar',
+	            icon:        'LM_Bar.png',
+	            image:       'preview_Speakeasy.jpg',
+	            description: 'Local bar run by Pentti Penttilä, located in Tenement A Basement<br>' +
 		'<br><i><a href="https://stalburg.net/Speakeasy">See on the wiki</a></i>'
-	},
+	        },
+	        {
+	            name:        'Ville Sköldgangster',
+	            icon:        'LM_NPC.png',
+	            image:       'preview_rent_Ville.jpg',
+	            description: 'A resident needing an apartment to live found drinking at the Speakeasy bar<br>' +
+		'<br><i><a href="https://stalburg.net/Obenseuer/Characters#Ville_Sk%C3%B6ldgangster">See on the wiki</a></i>'
+	        }
+	    ]
 	{
 	    id:          'tenement_B',
 	    name:        'Tenement B',
@@ -722,5 +734,47 @@
 				'<br><i><a href="https://stalburg.net/Obenseuer/Characters#Sara_Claine">See on the wiki</a></i>'
 			}
 	    ] 
+	},
+	{
+	    id:          'resource_wood01',
+	    name:        'Tree Debris',
+	    icon:        'LM_Wooddebris.png',
+	    latlng:      [-62,45],
+	    image:       'preview_trees.jpg',
+	    description: 'A pile of <b>Tree Debris</b> harvestable with an axe<br>' +
+		'<br><i><a href="https://stalburg.net/Tree_Chopping">See on the wiki</a></i>'
+	},
+	    id:          'resource_wood02',
+	    name:        'Tree Debris',
+	    icon:        'LM_Wooddebris.png',
+	    latlng:      [-65,116],
+	    image:       'preview_trees2.jpg',
+	    description: 'A pile of <b>Tree Debris</b> harvestable with an axe<br>' +
+		'<br><i><a href="https://stalburg.net/Tree_Chopping">See on the wiki</a></i>'
+	},
+	    id:          'resource_wood03',
+	    name:        'Tree Debris',
+	    icon:        'LM_Wooddebris.png',
+	    latlng:      [-38,23],
+	    image:       'preview_trees3.jpg',
+	    description: 'A pile of <b>Tree Debris</b> harvestable with an axe<br>' +
+		'<br><i><a href="https://stalburg.net/Tree_Chopping">See on the wiki</a></i>'
+	},
+	    id:          'resource_wood04',
+	    name:        'Tree Debris',
+	    icon:        'LM_Wooddebris.png',
+	    latlng:      [-35,-13],
+	    image:       'preview_trees4.jpg',
+	    description: 'A pile of <b>Tree Debris</b> harvestable with an axe<br>' +
+		'<br><i><a href="https://stalburg.net/Tree_Chopping">See on the wiki</a></i>'
+	},
+	{
+	    id:          'resource_rock',
+	    name:        'Rock Pile',
+	    icon:        'LM_Rockdebris.png',
+	    latlng:      [-70,87],
+	    image:       'preview_rocks.jpg',
+	    description: 'A pile of rocks harvestable with an pickaxe<br>' +
+		'<br><i><a href="https://stalburg.net/Rock_Mining">See on the wiki</a></i>'
 	}
 ];
