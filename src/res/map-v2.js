@@ -101,7 +101,7 @@ docReady(function() { // for great js COMPATIBILITY (see docready.js, this shit 
 		layers: [os_base]
 	}).setView([0,0],2);
 
-	L.control.attribution({prefix: '<a href="https://github.com/loiste-interactive/StalburgMap">Contribute on GitHub</a> | Made by <a href="https://d7.wtf/">deseven</a> &amp; Nextej | Based on original <a href="https://loisteinteractive.com/">Loiste</a> maps | Powered by <a href="https://leafletjs.com/">Leaflet</a>'}).addTo(map);
+	L.control.attribution({prefix: '<a href="https://github.com/loiste-interactive/ObenseuerMap">Contribute on GitHub</a> | Made by <a href="https://d7.wtf/">deseven</a> &amp; Nextej | Based on original <a href="https://loisteinteractive.com/">Loiste</a> maps | Powered by <a href="https://leafletjs.com/">Leaflet</a>'}).addTo(map);
 
 	map.addLayer(locations);
 	objects.forEach(addLocation);
