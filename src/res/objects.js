@@ -744,6 +744,7 @@
 	    description: 'A pile of <b>Tree Debris</b> harvestable with an axe<br>' +
 		'<br><i><a href="https://stalburg.net/Tree_Chopping">See on the wiki</a></i>'
 	},
+	{
 	    id:          'resource_wood02',
 	    name:        'Tree Debris',
 	    icon:        'LM_Wooddebris.png',
@@ -752,6 +753,7 @@
 	    description: 'A pile of <b>Tree Debris</b> harvestable with an axe<br>' +
 		'<br><i><a href="https://stalburg.net/Tree_Chopping">See on the wiki</a></i>'
 	},
+	{
 	    id:          'resource_wood03',
 	    name:        'Tree Debris',
 	    icon:        'LM_Wooddebris.png',
@@ -760,6 +762,7 @@
 	    description: 'A pile of <b>Tree Debris</b> harvestable with an axe<br>' +
 		'<br><i><a href="https://stalburg.net/Tree_Chopping">See on the wiki</a></i>'
 	},
+	{
 	    id:          'resource_wood04',
 	    name:        'Tree Debris',
 	    icon:        'LM_Wooddebris.png',
