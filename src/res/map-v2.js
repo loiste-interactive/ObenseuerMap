@@ -158,8 +158,8 @@ docReady(function() { // for great js COMPATIBILITY (see docready.js, this shit 
 	map.on('click',function(e){
 		removeHash();
 		var coord = e.latlng;
-		var lat = coord.lat;
-		var lng = coord.lng;
+		var lat = coord.lat.toFixed(2);
+		var lng = coord.lng.toFixed(2);
 		if (promptCoordinates) {
 			console.log('map coords: [' + lat + ',' + lng + ']');
 			prompt('map coords',lat + ',' + lng);
@@ -176,8 +176,8 @@ docReady(function() { // for great js COMPATIBILITY (see docready.js, this shit 
 		});
 		if (!anyPopupActivated) {
 			var latlng = map.getCenter();
-			latlng.lat = Math.round(latlng.lat * 1000) / 1000; // this shit exists only
-			latlng.lng = Math.round(latlng.lng * 1000) / 1000; // because js can't into math
+			latlng.lat = latlng.lat.toFixed(2);
+			latlng.lng = latlng.lng.toFixed(2);
 			setHash('loc:' + latlng.lat + ',' + latlng.lng + ',' + map.getZoom());
 		}
 	});
