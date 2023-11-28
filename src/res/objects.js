@@ -407,7 +407,7 @@ var objects = [
 	    name:        'Tenement A',
 	    icon:        'LM_Tenement_A.png',
 	    latlng:      [27,-149],
-	    image:       'preview_TenA.jpg',
+	    image:       'preview_tenA.jpg',
 	    description: 'Inaccessible <b>Tenement A</b><br>' +
 		'<br><i><a href="https://stalburg.net/Tenement_A">See on the wiki</a></i>' 
 	},
