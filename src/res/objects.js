@@ -129,10 +129,10 @@
 	    latlng: [-62,2],
 	    sublocs: [
 	        {
-	            name:        '"M%C3%B6belmann Furnitures"',
+	            name:        '"Möbelmann Furnitures"',
 	            icon:        'LM_Market.png',
 	            image:       'preview_Mobelmann.jpg',
-	            description: 'Furniture store on the first floor operated by Hank M%C3%B6belmann<br>' +
+	            description: 'Furniture store on the first floor operated by Hank Möbelmann<br>' +
 				'<table class="hours_table">' +
 				'<tr><td colspan="2">Opening hours:</td></tr>' +
 				'<tr><th>Monday</th><td>08:00 - 18:00</td></tr>' +
@@ -272,7 +272,7 @@
 	    icon:   'LM_Stall.png',
 	    latlng: [16,-76],
 	    image:       'preview_stalls_kurahaara.jpg',
-	    description: '<b>Kurahaara Brothers Farming Cooperative\'s Seeds stall</b> operated by L%C3%B6nkka Kurahaara, sells seeds and vegetables<br><br>' +
+	    description: '<b>Kurahaara Brothers Farming Cooperative\'s Seeds stall</b> operated by Lönkka Kurahaara, sells seeds and vegetables<br><br>' +
 		'<table class="hours_table">' +
 		'<tr><td colspan="2">Opening hours:</td></tr>' +
 		'<tr><th>Monday</th><td>??? - ???</td></tr>' +
@@ -477,7 +477,7 @@
 				'<br><i><a href="https://stalburg.net/Obenseuer/Characters#Taneli_Kurju">See on the wiki</a></i>'
 			},
 			{
-				name:        'Kirka and Hall K%C3%A4%C3%A4bus',
+				name:        'Kirka and Hall Kääbus',
 				icon:        'LM_NPC.png',
 				image:       'preview_rent_Kirka.jpg',
 				description: 'A couple needing an apartment to live found at the Hostel Warehom<br>' +
@@ -534,7 +534,7 @@
 	    icon:        'LM_Unknown.png',
 	    latlng:      [-25,-118],
 	    image:       'preview_kurahaara_house.jpg',
-	    description: 'A house where brothers Jomppe, L%C3%B6nkka and Simppa Kurahaara live' +
+	    description: 'A house where brothers Jomppe, Lönkka and Simppa Kurahaara live' +
 		'<br><i><a href="https://stalburg.net/Kurahaara_House">See on the wiki</a></i>' 
 	},
 	{
@@ -707,15 +707,6 @@
 	    image:       'preview_YellowShack.jpg',
 	    description: 'A shack with a balcony<br>' +
 		'<br><i><a href="https://stalburg.net/Yellow_shack">See on the wiki</a></i>'
-	},
-	{
-	    id:          'sara_claine',
-	    name:        'Sara Claine',
-	    icon:        'LM_NPC.png',
-	    latlng:      [6,-61],
-	    image:       'preview_rent_Sara.jpg',
-	    description: 'A resident needing an apartment to live found in the decommissioned bus<br>' +
-		'<br><i><a href="https://stalburg.net/Obenseuer/Characters#Sara_Claine">See on the wiki</a></i>'
 	},
 	{
 	    id:          'bus',
