@@ -427,7 +427,7 @@
 	        {
 	            name:        'Ville Sköldgangster',
 	            icon:        'LM_NPC.png',
-	            image:       'preview_rent_Ville.jpg',
+	            image:       'preview_rent_Ville.png',
 	            description: 'A resident needing an apartment to live found drinking at the Speakeasy bar<br>' +
 		'<br><i><a href="https://stalburg.net/Obenseuer/Characters#Ville_Sk%C3%B6ldgangster">See on the wiki</a></i>'
 	        }
@@ -740,8 +740,8 @@
 	    id:          'resource_wood01',
 	    name:        'Tree Debris',
 	    icon:        'LM_Wooddebris.png',
-	    latlng:      [-62,45],
-	    image:       'preview_trees.jpg',
+	    latlng:      [-62*0.58,45*1.098],
+	    image:       'preview_trees.png',
 	    description: 'A pile of <b>Tree Debris</b> harvestable with an axe<br>' +
 		'<br><i><a href="https://stalburg.net/Tree_Chopping">See on the wiki</a></i>'
 	},
@@ -749,8 +749,8 @@
 	    id:          'resource_wood02',
 	    name:        'Tree Debris',
 	    icon:        'LM_Wooddebris.png',
-	    latlng:      [-65,116],
-	    image:       'preview_trees2.jpg',
+	    latlng:      [-65*0.58,116*1.098],
+	    image:       'preview_trees2.png',
 	    description: 'A pile of <b>Tree Debris</b> harvestable with an axe<br>' +
 		'<br><i><a href="https://stalburg.net/Tree_Chopping">See on the wiki</a></i>'
 	},
@@ -758,8 +758,8 @@
 	    id:          'resource_wood03',
 	    name:        'Tree Debris',
 	    icon:        'LM_Wooddebris.png',
-	    latlng:      [-38,23],
-	    image:       'preview_trees3.jpg',
+	    latlng:      [-38*0.58,23*1.098],
+	    image:       'preview_trees3.png',
 	    description: 'A pile of <b>Tree Debris</b> harvestable with an axe<br>' +
 		'<br><i><a href="https://stalburg.net/Tree_Chopping">See on the wiki</a></i>'
 	},
@@ -767,8 +767,8 @@
 	    id:          'resource_wood04',
 	    name:        'Tree Debris',
 	    icon:        'LM_Wooddebris.png',
-	    latlng:      [-35,-13],
-	    image:       'preview_trees4.jpg',
+	    latlng:      [-35*0.58,-13*1.098],
+	    image:       'preview_trees4.png',
 	    description: 'A pile of <b>Tree Debris</b> harvestable with an axe<br>' +
 		'<br><i><a href="https://stalburg.net/Tree_Chopping">See on the wiki</a></i>'
 	},
@@ -776,8 +776,8 @@
 	    id:          'resource_rock',
 	    name:        'Rock Pile',
 	    icon:        'LM_Rockdebris.png',
-	    latlng:      [-70,87],
-	    image:       'preview_rocks.jpg',
+	    latlng:      [-70*0.58,87*1.098],
+	    image:       'preview_rocks.png',
 	    description: 'A pile of rocks harvestable with an pickaxe<br>' +
 		'<br><i><a href="https://stalburg.net/Rock_Mining">See on the wiki</a></i>'
 	}
