@@ -502,6 +502,13 @@
 				image:       'preview_rent_Fenella.jpg',
 				description: 'A couple needing an apartment to live found at the OS Telemarketing Company<br>' +
 				'<br><i><a href="https://stalburg.net/Obenseuer/Characters#Fenella_Hunt_and_Moray_Larson">See on the wiki</a></i>'
+			},
+			{
+				name:        'Payphone',
+				icon:        'LM_Phone.png',
+				image:       'preview_KolholaPhone.jpg',
+				description: 'A public <b>payphone</b> that allows to make connections to anywhere in the Stalburg for only 3 RMs per call<br>' +
+		'<br><i><a href="https://stalburg.net/Phone#Payphone">See on the wiki</a></i>' 
 			}
 	    ] 
 	},
