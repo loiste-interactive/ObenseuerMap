@@ -324,6 +324,15 @@
 		'<br><br><i><a href="https://stalburg.net/Obenseuer/Shop_Vendors#Decorative_Plants_\&_Pots">See on the wiki</a></i>'
 	},
 	{
+	    id:     'stalls_gift',
+	    name:   'Gift Shop',
+	    icon:   'LM_Stall.png',
+	    latlng: [-16,-74],
+	    image:       'preview_stalls_gift.jpg',
+	    description: '<b>Gift Shop</b> is open on weekends
+		'<br><br><i><a href="https://stalburg.net/Obenseuer/Shop_Vendors#"Gift_Shop"_Stall">See on the wiki</a></i>'
+	},
+	{
 	    id:     'stalls_cannedfood',
 	    name:   '"Jams \& Canned Food" stall',
 	    icon:   'LM_Stall.png',
@@ -509,6 +518,20 @@
 				image:       'preview_KolholaPhone.jpg',
 				description: 'A public <b>payphone</b> that allows to make connections to anywhere in the Stalburg for only 3 RMs per call<br>' +
 		'<br><i><a href="https://stalburg.net/Phone#Payphone">See on the wiki</a></i>' 
+			},
+			{
+				name:        'Telemarketing Job',
+				icon:        'LM_Job.png',
+				image:       'preview_Job_telemarketing.jpg',
+				description: 'A place where you can work the <b>Telemarketing Job</b> for OC<br>' +
+		'<br><i><a href="https://stalburg.net/Telemarketing_Job">See on the wiki</a></i>' 
+			},
+			{
+				name:        'Pizza Delivery Job',
+				icon:        'LM_Job.png',
+				image:       'preview_Job_pizza.jpg',
+				description: 'A place where you can work the <b>Pizza Delivery Job</b> for RM<br>' +
+		'<br><i><a href="https://stalburg.net/Pizza_Delivery_Job">See on the wiki</a></i>' 
 			}
 	    ] 
 	},
@@ -573,7 +596,16 @@
 	    latlng:      [5,-109],
 	    image:       'preview_kurahaara_greenhouse.jpg',
 	    description: 'A large <b>Greenhouse</b> built on the roof of O-Market, operated by Jompe Kurahaara' +
-		'<br><i><a href="https://stalburg.net/Greenhouse">See on the wiki</a></i>' 
+		'<br><i><a href="https://stalburg.net/Greenhouse">See on the wiki</a></i>' ,
+	    sublocs: [
+	        {
+				name:        'Farming Job',
+				icon:        'LM_Job.png',
+				image:       'preview_Job_farming.jpg',
+				description: 'A place where you can work the <bFarming Job</b> for OC<br>' +
+		'<br><i><a href="https://stalburg.net/Farming_Job">See on the wiki</a></i>' 
+	        }
+	    ] 
 	},
 	{
 	    id:          'leon_borg',
@@ -695,7 +727,7 @@
 	{
 	    id:          'duck_house',
 	    name:        'Mr. Duck\'s Home',
-	    icon:        'LM_Unknown.png',
+	    icon:        'LM_Duck.png',
 	    latlng:      [-76,51],
 	    image:       'preview_duckHouse.jpg',
 	    description: 'A little home with a lot of creppy rubber ducks around<br>' +
