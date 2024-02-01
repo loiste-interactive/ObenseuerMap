@@ -2,5 +2,6 @@ Thumbs.db
 .DS_Store
 *.log
 src/root/tiles/
+src/api/config.php
 dist/
 src/stalburg/stalburg-sat.afphoto

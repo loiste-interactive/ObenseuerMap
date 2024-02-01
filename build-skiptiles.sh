@@ -7,8 +7,9 @@ command -v gsed >/dev/null 2>&1 && alias sed=gsed
 
 commit=$(git rev-parse --short HEAD)
 
-rm -rf dist/res/
+rm -rf dist/res/ dist/api/
 cp -rf src/res/ dist/res/
+cp -rf src/api/ dist/api/
 cp -f src/index.html src/favicon.ico dist/
 
 # replacing internal values with short commit id

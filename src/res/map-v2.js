@@ -140,7 +140,14 @@ docReady(function() { // for great js COMPATIBILITY (see docready.js, this shit 
 
 	if (window.location.hash.substring(1)) {
 		var loc,safeHash;
-		if (window.location.hash.substring(1).toLowerCase().startsWith('loc:')) {
+		if (window.location.hash.substring(1).toLowerCase() == "editor") {
+			var editor = document.createElement('script');
+			editor.onload = function () {
+				editorInit();
+			};
+			editor.src = "res/editor.js";
+			document.head.appendChild(editor);
+		} else if (window.location.hash.substring(1).toLowerCase().startsWith('loc:')) {
 			loc = window.location.hash.substring(1).toLowerCase().split(':');
 			loc = loc[1].split(',');
 			map.setView([loc[0],loc[1]],loc[2]);

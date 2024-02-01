@@ -63,6 +63,7 @@ else
 	cd ..
 
 	cp -r src/res/ dist/res/
+	cp -r src/api/ dist/api/
 	cp src/index.html src/favicon.ico src/locations* dist/
 
 	# replacing internal values with short commit id
