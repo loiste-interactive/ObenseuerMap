@@ -329,7 +329,7 @@
 	    icon:   'LM_Stall.png',
 	    latlng: [-16,-74],
 	    image:       'preview_stalls_gift.jpg',
-	    description: '<b>Gift Shop</b> is open on weekends
+	    description: '<b>Gift Shop</b> is open on weekends' + 
 		'<br><br><i><a href="https://stalburg.net/Obenseuer/Shop_Vendors#"Gift_Shop"_Stall">See on the wiki</a></i>'
 	},
 	{
