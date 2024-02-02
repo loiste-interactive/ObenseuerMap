@@ -67,7 +67,8 @@ function addLocation(location) {
 				popupAnchor:  [0,-32]
 			}),
 			opacity: 0.9,
-			id: location.id
+			id: location.id,
+			location_data: location
 		}
 	)
 	.bindPopup(location.html,{maxWidth:400,minWidth:400,className:'location',closeButton:false})
@@ -143,7 +144,7 @@ docReady(function() { // for great js COMPATIBILITY (see docready.js, this shit 
 		if (window.location.hash.substring(1).toLowerCase() == "editor") {
 			var editor = document.createElement('script');
 			editor.onload = function () {
-				editorInit();
+				editorLogin();
 			};
 			editor.src = "res/editor.js";
 			document.head.appendChild(editor);

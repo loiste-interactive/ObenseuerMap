@@ -20,12 +20,19 @@ if (isset($_GET['login'])) {
     } else {
         response(["error" => "gtfo"],403);
     }
-    $result->free();
 } elseif (isset($_GET['checktoken'])) {
     check_token();
     response(["result" => "ok"]);
+} elseif (isset($_GET['saveall'])) {
+    check_token();
+    $locations = require_post();
+    if ($locations) {
+        foreach ($locations as $location) {
+            save($location);
+        }
+    } else {
+        response(["error" => "malformed data"],400);
+    }
 } else {
     response(["error" => "not found"],404);
 }
-
-db_close();

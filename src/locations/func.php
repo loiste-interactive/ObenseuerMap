@@ -4,12 +4,12 @@ function response($values,$code = 200) {
     header("Content-Type: application/json");
     http_response_code($code);
     echo json_encode($values);
+    db_close();
+    die();
 }
 
 function denied() {
     response(["error" => "gtfo"],403);
-    db_close();
-    die();
 }
 
 function get_config() {
@@ -28,7 +28,6 @@ function db_init() {
         if ($db->connect_errno) {
             error_log("Failed to connect to the database: ".$db->connect_error);
             response(["error" => "internal server error"],500);
-            die();
         }
     }
 }
@@ -98,4 +97,9 @@ function check_token() {
         }
     }
     denied();
+}
+
+function save($location) {
+    global $db;
+    db_init();
 }
