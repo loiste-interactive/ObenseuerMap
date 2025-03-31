@@ -5,3 +5,6 @@ src/root/tiles/
 src/locations/config.php
 dist/
 src/stalburg/stalburg-sat.afphoto
+node_modules/
+package-lock.json
+.env

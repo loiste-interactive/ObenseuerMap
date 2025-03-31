@@ -1,0 +1,15 @@
+services:
+  obenseuer-map-backend:
+    container_name: obenseuer-map-backend
+    image: node:18-alpine
+    restart: always
+    working_dir: /app
+    volumes:
+      - .:/app
+    command: sh -c "npm install && npm run start"
+    env_file:
+      - .env
+    ports:
+      - "127.0.0.1:${PORT:-5551}:${PORT:-5551}"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

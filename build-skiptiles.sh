@@ -9,7 +9,6 @@ commit=$(git rev-parse --short HEAD)
 
 rm -rf dist/res/ dist/locations/
 cp -rf src/res/ dist/res/
-cp -rf src/locations/ dist/locations/
 cp -f src/index.html src/favicon.ico dist/
 
 # replacing internal values with short commit id
