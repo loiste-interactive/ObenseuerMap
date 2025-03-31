@@ -68,7 +68,8 @@ function addLocation(location) {
 			}),
 			opacity: 0.9,
 			id: location.id,
-			location_data: location
+			location_data: location,
+			draggable: false // Markers are not draggable by default, will be enabled in editor mode
 		}
 	)
 	.bindPopup(location.html,{maxWidth:400,minWidth:400,className:'location',closeButton:false})
@@ -142,15 +143,32 @@ docReady(function() { // for great js COMPATIBILITY (see docready.js, this shit 
 		promptCoordinates = true;
 	}
 
-	if (window.location.hash.substring(1)) {
+	if (window.location.hash.substring(1) || window.location.search.includes('maintenance-login') || sessionStorage.getItem('token')) {
 		var loc,safeHash;
-		if (window.location.hash.substring(1).toLowerCase() == "editor") {
-			var editor = document.createElement('script');
-			editor.onload = function () {
-				editorLogin();
-			};
-			editor.src = "res/editor.js";
-			document.head.appendChild(editor);
+		if (window.location.search.includes('maintenance-login') || sessionStorage.getItem('token')) {
+			// Load PathDrag extension first if not already loaded
+			if (typeof L.Handler.PathDrag === 'undefined') {
+				var pathDrag = document.createElement('script');
+				pathDrag.onload = function() {
+					// Then load editor script
+					var editor = document.createElement('script');
+					editor.onload = function () {
+						editorLogin();
+					};
+					editor.src = "res/editor.js";
+					document.head.appendChild(editor);
+				};
+				pathDrag.src = "res/Leaflet.PathDrag.js";
+				document.head.appendChild(pathDrag);
+			} else {
+				// If PathDrag is already loaded, just load the editor
+				var editor = document.createElement('script');
+				editor.onload = function () {
+					editorLogin();
+				};
+				editor.src = "res/editor.js";
+				document.head.appendChild(editor);
+			}
 		} else if (window.location.hash.substring(1).toLowerCase().startsWith('loc:')) {
 			loc = window.location.hash.substring(1).toLowerCase().split(':');
 			loc = loc[1].split(',');
