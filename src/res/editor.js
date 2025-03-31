@@ -46,32 +46,6 @@ function editorInit() {
     map.addControl(button_save_all);
 }
 
-function saveAll() {
-    button_save_all.remove();
-
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', '/locations/?saveall', true);
-    xhr.setRequestHeader('X-Token', sessionStorage.getItem('token'));
-
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === XMLHttpRequest.DONE) {
-            if (xhr.status === 200) {
-                console.log('Save successful');
-            } else {
-                console.error('Save failed');
-            }
-            map.addControl(button_save_all);
-        }
-    };
-
-    let locations_data = [];
-    locations.eachLayer(function(layer){
-        locations_data.push(layer.options.location_data);
-    });
-    xhr.send(JSON.stringify(locations_data));
-
-}
-
 function checkToken() {
 
     const xhr = new XMLHttpRequest();

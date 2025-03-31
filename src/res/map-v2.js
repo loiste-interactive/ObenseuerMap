@@ -105,7 +105,10 @@ docReady(function() { // for great js COMPATIBILITY (see docready.js, this shit 
 	L.control.attribution({prefix: '<a href="https://github.com/loiste-interactive/ObenseuerMap">Contribute on GitHub</a> | Made by <a href="https://d7.wtf/">deseven</a> &amp; Nextej | Based on original <a href="https://loisteinteractive.com/">Loiste</a> maps | Powered by <a href="https://leafletjs.com/">Leaflet</a>'}).addTo(map);
 
 	map.addLayer(locations);
-	objects.forEach(addLocation);
+	fetch('https://obenseuer.stalburg.net/locations/?getall')
+		.then(response => response.json())
+		.then(data => data.forEach(addLocation))
+		.catch(error => console.error('Error loading locations:', error));
 
 	var baseLayers = {
 	    '<span class="fas fa-map"></span> Map': os_base,
