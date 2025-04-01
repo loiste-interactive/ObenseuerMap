@@ -207,5 +207,46 @@ router.post('/locations/save', verifyAuth, async (req, res) => {
 });
 
 
+/**
+ * Delete a location by ID
+ * DELETE /delete/:id
+ * Requires authentication
+ */
+router.delete('/locations/delete/:id', verifyAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    if (!id) {
+      return sendError(res, 'Location ID is required', 400);
+    }
+    
+    // Check if location exists
+    const existingLocation = await db.query(
+      'SELECT id FROM locations WHERE id = ?',
+      [id]
+    );
+    
+    if (existingLocation.length === 0) {
+      return sendError(res, `Location with ID ${id} not found`, 404);
+    }
+    
+    // First delete sublocations
+    await db.query('DELETE FROM sublocations WHERE location_id = ?', [id]);
+    
+    // Then delete the location
+    await db.query('DELETE FROM locations WHERE id = ?', [id]);
+    
+    // Reload the locations cache after deletion
+    loadLocationsCache().catch(err => {
+      console.error('Failed to reload locations cache after deletion:', err);
+    });
+    
+    sendResponse(res, { success: true, id });
+  } catch (error) {
+    console.error('Error deleting location:', error);
+    sendError(res, 'Failed to delete location');
+  }
+});
+
 module.exports = router;
 module.exports.loadLocationsCache = loadLocationsCache;

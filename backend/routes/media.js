@@ -9,9 +9,7 @@ const { verifyAuth } = require('../middleware/auth');
 // Set up multer storage for file uploads
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    // In production this would be /dist/res/images/locations
-    // For development we'll use the src path
-    cb(null, path.join(__dirname, '../../src/res/images/locations'));
+    cb(null, path.join(__dirname, '../../dist/res/images/locations'));
   },
   filename: function (req, file, cb) {
     // Keep the original filename
@@ -43,9 +41,9 @@ const upload = multer({
  */
 router.get('/locations/getcategories', verifyAuth, (req, res) => {
   try {
-    // In production this would be /dist/res/images/icons
-    // For development we'll use the src path
-    const iconsDir = path.join(__dirname, '../../src/res/images/icons');
+    console.log("!!!");
+    console.log(__dirname);
+    const iconsDir = path.join(__dirname, '../../dist/res/images/icons');
     
     // Read all files in the directory
     const files = fs.readdirSync(iconsDir);
@@ -70,9 +68,7 @@ router.get('/locations/getcategories', verifyAuth, (req, res) => {
  */
 router.get('/locations/getimages', verifyAuth, (req, res) => {
   try {
-    // In production this would be /dist/res/images/locations
-    // For development we'll use the src path
-    const locationsDir = path.join(__dirname, '../../src/res/images/locations');
+    const locationsDir = path.join(__dirname, '../../dist/res/images/locations');
     
     // Read all files in the directory
     const files = fs.readdirSync(locationsDir);
