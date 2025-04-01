@@ -2,7 +2,7 @@ let logindialog;
 let button_save_all;
 let button_logout;
 let button_toggle_mode;
-let movedLocations = new Set(); // Track which locations have been moved
+let editedLocations = new Set(); // Track which locations have been edited
 let isEditingMode = false; // Default to viewing mode for logged-in users
 const notyf = new Notyf({
     duration: 2000,
@@ -127,7 +127,7 @@ function editorInit() {
     // Set up markers but start in viewing mode
     makeMarkersMovable();
     
-    notyf.success('Locations are locked. Click the eye icon to switch to moving mode.');
+    notyf.success('Locations are locked. Click the eye icon to switch to editing mode.');
 }
 
 function checkToken() {
@@ -235,7 +235,7 @@ function toggleEditMode() {
     if (modeButton) {
         if (isEditingMode) {
             modeButton.innerHTML = '<span class="fas fa-edit"></span>'; // Edit icon
-            notyf.success('Moving mode enabled. You can now move locations.');
+            notyf.success('Editing mode enabled. You can now move and edit locations.');
             enableMarkerDragging();
         } else {
             modeButton.innerHTML = '<span class="fas fa-eye"></span>'; // View icon
@@ -287,7 +287,7 @@ function makeMarkersMovable() {
                 marker.options.location_data.latlng = [position.lat, position.lng];
                 
                 // Add this location to the set of moved locations
-                movedLocations.add(marker.options.id);
+                editedLocations.add(marker.options.id);
                 
                 // Enable save button
                 const saveButton = document.querySelector('.leaflet-control.leaflet-bar a[title="Save All"]');
@@ -334,7 +334,7 @@ async function saveAll() {
     // Get only the moved locations from the map
     const locationsToSave = [];
     forEachLocationMarker(function(layer) {
-        if (movedLocations.has(layer.options.id)) {
+        if (editedLocations.has(layer.options.id)) {
             locationsToSave.push(layer.options.location_data);
         }
     });
@@ -386,7 +386,7 @@ async function saveAll() {
     if (failureCount === 0) {
         notyf.success('All changed locations saved successfully');
         // Clear the moved locations set after successful save
-        movedLocations.clear();
+        editedLocations.clear();
         // Disable save button
         saveButton.style.opacity = '0.5';
         saveButton.style.pointerEvents = 'none';

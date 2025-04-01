@@ -7,6 +7,7 @@ const db = require('./database');
 // Import routes
 const authRoutes = require('./routes/auth');
 const locationsRoutes = require('./routes/locations');
+const mediaRoutes = require('./routes/media');
 
 // Initialize Express app
 const app = express();
@@ -24,6 +25,7 @@ app.use((req, res, next) => {
 // Routes
 app.use('/', authRoutes);
 app.use('/', locationsRoutes);
+app.use('/', mediaRoutes);
 
 // 404 handler
 app.use((req, res) => {
