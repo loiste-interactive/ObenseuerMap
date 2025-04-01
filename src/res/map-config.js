@@ -141,7 +141,7 @@ function initializeMap() {
     }).addTo(map);
 
     // Add wiki back button if coming from the wiki
-    if (document.referrer.indexOf("stalburg.arctar.us") > -1 || document.referrer.indexOf("stalburg.net") > -1) {
+    if (document.referrer.indexOf("stalburg.arctar.us") > -1 || (document.referrer.indexOf("stalburg.net") > -1 && document.referrer.indexOf(".stalburg.net") == -1)) {
         const backToWiki = L.control({
             position: 'topcenter'
         });

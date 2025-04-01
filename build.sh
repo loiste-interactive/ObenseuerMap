@@ -62,7 +62,23 @@ else
 
 	cd ..
 
-	cp -r src/res/ dist/res/
+	# Create the dist/res directory
+	mkdir -p dist/res/
+
+	# Copy everything from src/res to dist/res except the images directory
+	for file in $(find src/res -type f -not -path "src/res/images*"); do
+		# Get the relative path from src/res
+		rel_path=${file#src/res/}
+		# Create the directory if it doesn't exist
+		mkdir -p "dist/res/$(dirname "$rel_path")"
+		# Copy the file
+		cp "$file" "dist/res/$rel_path"
+	done
+
+	# Create a symlink for the images directory
+	ln -sf ../../src/res/images dist/res/images
+
+	# Copy index.html, favicon.ico, and locations files
 	cp src/index.html src/favicon.ico src/locations* dist/
 
 	# replacing internal values with short commit id

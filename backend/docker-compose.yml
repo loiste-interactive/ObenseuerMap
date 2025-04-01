@@ -6,7 +6,7 @@ services:
     working_dir: /app
     volumes:
       - .:/app
-      - ../dist:/dist
+      - ../src/res/images:/images
     command: sh -c "npm install && npm run start"
     env_file:
       - .env

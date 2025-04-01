@@ -11,7 +11,7 @@ const db = require('../database');
 // Set up multer storage for location image uploads
 const locationImageStorage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, '../../dist/res/images/locations'));
+    cb(null, '/images/locations');
   },
   filename: function (req, file, cb) {
     // Keep the original filename for location images
@@ -39,7 +39,7 @@ const uploadLocationImage = multer({
 // Set up multer storage for category icon uploads
 const categoryIconStorage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, '../../dist/res/images/icons'));
+    cb(null, '/images/icons');
   },
   filename: function (req, file, cb) {
     // Prefix with LM_ and keep the original filename for category icons
@@ -75,7 +75,7 @@ const uploadCategoryIcon = multer({
  */
 router.get('/locations/getcategories', verifyAuth, (req, res) => {
   try {
-    const iconsDir = path.join(__dirname, '../../dist/res/images/icons');
+    const iconsDir = '/images/icons';
     
     // Read all files in the directory
     const files = fs.readdirSync(iconsDir);
@@ -100,7 +100,7 @@ router.get('/locations/getcategories', verifyAuth, (req, res) => {
  */
 router.get('/locations/getimages', verifyAuth, (req, res) => {
   try {
-    const locationsDir = path.join(__dirname, '../../dist/res/images/locations');
+    const locationsDir = '/images/locations';
     
     // Read all files in the directory
     const files = fs.readdirSync(locationsDir);
@@ -266,7 +266,7 @@ router.delete('/locations/deletecategory/:category', verifyAuth, async (req, res
     }
     
     // Check if file exists
-    const iconPath = path.join(__dirname, '../../dist/res/images/icons', categoryFilename);
+    const iconPath = path.join('/images/icons', categoryFilename);
     if (!fs.existsSync(iconPath)) {
       return sendError(res, `Category icon file not found: ${categoryFilename}`, 404);
     }
@@ -329,7 +329,7 @@ router.delete('/locations/deleteimage/:image', verifyAuth, async (req, res) => {
     }
     
     // Check if file exists
-    const imagePath = path.join(__dirname, '../../dist/res/images/locations', image);
+    const imagePath = path.join('/images/locations', image);
     if (!fs.existsSync(imagePath)) {
       return sendError(res, `Image file not found: ${image}`, 404);
     }
