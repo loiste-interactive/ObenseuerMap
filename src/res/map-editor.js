@@ -636,7 +636,9 @@ function showLocationEditForm(location) {
     const idField = document.getElementById('location-id');
     const nameField = document.getElementById('location-name');
     const categoryField = document.getElementById('location-category');
+    const categoryPreview = document.getElementById('location-category-preview');
     const imageField = document.getElementById('location-image');
+    const imagePreview = document.getElementById('location-image-preview');
     const descriptionField = document.getElementById('location-description');
     const hasSublocationsCheckbox = document.getElementById('has-sublocations');
     const sublocationsContainer = document.getElementById('sublocations-container');
@@ -668,6 +670,15 @@ function showLocationEditForm(location) {
         imageField.appendChild(option);
     });
     
+    // Set up event listeners for preview updates
+    categoryField.addEventListener('change', function() {
+        updateCategoryPreview(this.value, categoryPreview);
+    });
+    
+    imageField.addEventListener('change', function() {
+        updateImagePreview(this.value, imagePreview);
+    });
+    
     // Populate form with location data
     if (!isNewLocation) {
         idField.value = location.id;
@@ -680,6 +691,8 @@ function showLocationEditForm(location) {
             // Backward compatibility
             categoryField.value = location.icon.replace('.png', '');
         }
+        // Update category preview
+        updateCategoryPreview(categoryField.value, categoryPreview);
         
         descriptionField.value = location.description || '';
         
@@ -701,6 +714,8 @@ function showLocationEditForm(location) {
             // Set image for location without sublocations
             if (location.image) {
                 imageField.value = location.image;
+                // Update image preview
+                updateImagePreview(imageField.value, imagePreview);
             }
         }
         
@@ -759,7 +774,9 @@ function addNewSublocation(sublocation = null) {
     // Get form elements
     const nameField = newSublocation.querySelector('.sublocation-name');
     const categoryField = newSublocation.querySelector('.sublocation-category');
+    const categoryPreview = newSublocation.querySelector('.sublocation-category-preview');
     const imageField = newSublocation.querySelector('.sublocation-image');
+    const imagePreview = newSublocation.querySelector('.sublocation-image-preview');
     const descriptionField = newSublocation.querySelector('.sublocation-description');
     const removeButton = newSublocation.querySelector('.remove-sublocation');
     
@@ -781,6 +798,15 @@ function addNewSublocation(sublocation = null) {
         imageField.appendChild(option);
     });
     
+    // Set up event listeners for preview updates
+    categoryField.addEventListener('change', function() {
+        updateCategoryPreview(this.value, categoryPreview);
+    });
+    
+    imageField.addEventListener('change', function() {
+        updateImagePreview(this.value, imagePreview);
+    });
+    
     // Populate with sublocation data if provided
     if (sublocation) {
         nameField.value = sublocation.name || '';
@@ -793,11 +819,20 @@ function addNewSublocation(sublocation = null) {
             categoryField.value = sublocation.icon.replace('.png', '');
         }
         
+        // Update category preview
+        updateCategoryPreview(categoryField.value, categoryPreview);
+        
         if (sublocation.image) {
             imageField.value = sublocation.image;
+            // Update image preview
+            updateImagePreview(imageField.value, imagePreview);
         }
         
         descriptionField.value = sublocation.description || '';
+    } else {
+        // Initialize previews with default values
+        updateCategoryPreview(categoryField.value, categoryPreview);
+        updateImagePreview(imageField.value, imagePreview);
     }
     
     // Add event listener for remove button
@@ -1123,6 +1158,36 @@ async function deleteLocation(locationId) {
         console.error('Error deleting location:', error);
         notyf.error(`Failed to delete location: ${error.message}`);
     }
+}
+
+/**
+ * Updates the category preview image
+ * @param {string} category - The category value
+ * @param {HTMLElement} previewElement - The preview element to update
+ */
+function updateCategoryPreview(category, previewElement) {
+    if (!category || !previewElement) return;
+    
+    const iconUrl = `res/images/icons/${category}.png`;
+    previewElement.src = iconUrl;
+    previewElement.style.display = 'inline-block';
+}
+
+/**
+ * Updates the image preview
+ * @param {string} image - The image value
+ * @param {HTMLElement} previewElement - The preview element to update
+ */
+function updateImagePreview(image, previewElement) {
+    if (!image || !previewElement) return;
+    
+    // Handle both local and external URLs
+    const imagePath = image.startsWith('http')
+        ? image
+        : `res/images/locations/${image}`;
+    
+    previewElement.src = imagePath;
+    previewElement.style.display = 'inline-block';
 }
 
 // Make editor functions globally available

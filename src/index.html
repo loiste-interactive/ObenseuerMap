@@ -109,16 +109,22 @@
 			
 			<div style="margin-bottom: 15px;">
 				<label for="location-category" style="display: block; margin-bottom: 5px; font-weight: bold;">Category:</label>
-				<select id="location-category" name="category" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
-					<!-- Options will be populated by JavaScript -->
-				</select>
+				<div style="display: flex; align-items: center; gap: 10px;">
+					<img id="location-category-preview" src="" alt="Category Icon" style="width: 32px; height: 32px; display: none; border: 1px solid #ddd; border-radius: 4px; padding: 2px; background-color: #f9f9f9;">
+					<select id="location-category" name="category" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+						<!-- Options will be populated by JavaScript -->
+					</select>
+				</div>
 			</div>
 			
 			<div style="margin-bottom: 15px;" id="location-image-container">
 				<label for="location-image" style="display: block; margin-bottom: 5px; font-weight: bold;">Image:</label>
-				<select id="location-image" name="image" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
-					<!-- Options will be populated by JavaScript -->
-				</select>
+				<div style="display: flex; align-items: center; gap: 10px;">
+					<img id="location-image-preview" src="" alt="Location Image" style="width: 60px; height: 45px; object-fit: cover; display: none; border: 1px solid #ddd; border-radius: 4px; padding: 2px; background-color: #f9f9f9;">
+					<select id="location-image" name="image" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+						<!-- Options will be populated by JavaScript -->
+					</select>
+				</div>
 			</div>
 			
 			<div style="margin-bottom: 15px;">
@@ -177,16 +183,22 @@
 		
 		<div style="margin-bottom: 10px;">
 			<label style="display: block; margin-bottom: 5px; font-weight: bold;">Category:</label>
-			<select class="sublocation-category" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; max-width: 100%;">
-				<!-- Options will be populated by JavaScript -->
-			</select>
+			<div style="display: flex; align-items: center; gap: 10px;">
+				<img class="sublocation-category-preview" src="" alt="Category Icon" style="width: 32px; height: 32px; display: none; border: 1px solid #ddd; border-radius: 4px; padding: 2px; background-color: #f9f9f9;">
+				<select class="sublocation-category" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; max-width: 100%;">
+					<!-- Options will be populated by JavaScript -->
+				</select>
+			</div>
 		</div>
 		
 		<div style="margin-bottom: 10px;">
 			<label style="display: block; margin-bottom: 5px; font-weight: bold;">Image:</label>
-			<select class="sublocation-image" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; height: 35px; max-width: 100%;">
-				<!-- Options will be populated by JavaScript -->
-			</select>
+			<div style="display: flex; align-items: center; gap: 10px;">
+				<img class="sublocation-image-preview" src="" alt="Location Image" style="width: 60px; height: 45px; object-fit: cover; display: none; border: 1px solid #ddd; border-radius: 4px; padding: 2px; background-color: #f9f9f9;">
+				<select class="sublocation-image" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; height: 35px; max-width: 100%;">
+					<!-- Options will be populated by JavaScript -->
+				</select>
+			</div>
 		</div>
 		
 		<div style="margin-bottom: 10px;">
