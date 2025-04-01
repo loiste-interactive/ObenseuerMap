@@ -1,7 +1,9 @@
 let logindialog;
 let button_save_all;
 let button_logout;
+let button_toggle_mode;
 let movedLocations = new Set(); // Track which locations have been moved
+let isEditingMode = false; // Default to viewing mode for logged-in users
 const notyf = new Notyf({
     duration: 2000,
     position: {
@@ -16,14 +18,25 @@ function editorLogin() {
     if (sessionStorage.getItem('token')) {
         checkToken();
     } else {
-        loginform = '<form id="loginForm">' +
-            '<label for="username">Username:</label><br><input type="text" id="user" name="user"><br>' +
-            '<label for="password">Password:</label><br><input type="password" id="pw" name="pw"><br><br>' +
-            '<button type="submit" id="loginButton">Submit</button>' +
-            '</form>';
-        logindialog = L.control.dialog({ size: [400, 300], position: 'topleft' }).setContent(loginform).addTo(map);
-
-        document.getElementById('loginForm').addEventListener('submit', function (e) {
+        // Get the login form from the DOM
+        const loginFormContainer = document.getElementById('loginFormContainer');
+        const loginForm = document.getElementById('loginForm');
+        
+        // Create a dialog and add the login form to it
+        logindialog = L.control.dialog({
+            size: [400, 300],
+            position: 'topleft',
+            'min-width': '350px'
+        }).addTo(map);
+        
+        // Move the login form into the dialog
+        logindialog._container.querySelector('.leaflet-control-dialog-contents').appendChild(loginForm);
+        
+        // Show the dialog
+        logindialog.open();
+        
+        // Add event listener to the form
+        loginForm.addEventListener('submit', function (e) {
             e.preventDefault();
             login();
         });
@@ -31,10 +44,30 @@ function editorLogin() {
 }
 
 function editorInit() {
-    // Add a small delay to ensure all markers are loaded before making them draggable
-    setTimeout(() => {
-        makeMarkersMovable();
-    }, 1000);
+    // Initialize in viewing mode by default
+    
+    L.button_toggle_mode = L.Control.extend({
+        options: {
+            name: 'Toggle Edit Mode',
+            position: 'topleft',
+            html: '<span class="fas fa-eye"></span>', // Default icon for viewing mode
+            callback: toggleEditMode
+        },
+        onAdd: function (map) {
+            var container = L.DomUtil.create('div', 'leaflet-control leaflet-bar'),
+                link = L.DomUtil.create('a', '', container);
+
+            link.href = '#';
+            link.title = this.options.name;
+            link.innerHTML = this.options.html;
+            L.DomEvent.on(link, 'click', L.DomEvent.stop)
+                .on(link, 'click', function () {
+                    this.options.callback.call();
+                }, this);
+
+            return container;
+        }
+    });
 
     L.button_save_all = L.Control.extend({
         options: {
@@ -84,10 +117,17 @@ function editorInit() {
         }
     });
 
+    button_toggle_mode = new L.button_toggle_mode();
     button_save_all = new L.button_save_all();
     button_logout = new L.button_logout();
+    map.addControl(button_toggle_mode);
     map.addControl(button_save_all);
     map.addControl(button_logout);
+    
+    // Set up markers but start in viewing mode
+    makeMarkersMovable();
+    
+    notyf.success('Locations are locked. Click the eye icon to switch to moving mode.');
 }
 
 function checkToken() {
@@ -186,47 +226,93 @@ async function saveLocation(location) {
     });
 }
 
-// Make all markers draggable and track which ones have been moved
+// Function to toggle between viewing and editing modes
+function toggleEditMode() {
+    isEditingMode = !isEditingMode;
+    
+    // Update the button icon
+    const modeButton = document.querySelector('.leaflet-control.leaflet-bar a[title="Toggle Edit Mode"]');
+    if (modeButton) {
+        if (isEditingMode) {
+            modeButton.innerHTML = '<span class="fas fa-edit"></span>'; // Edit icon
+            notyf.success('Moving mode enabled. You can now move locations.');
+            enableMarkerDragging();
+        } else {
+            modeButton.innerHTML = '<span class="fas fa-eye"></span>'; // View icon
+            notyf.success('View mode enabled. Locations are now locked.');
+            disableMarkerDragging();
+        }
+    }
+}
+
+// Initialize markers with event listeners but keep dragging disabled by default
 function makeMarkersMovable() {
-    console.log("Making markers movable...");
+    console.log("Setting up markers...");
     let markerCount = 0;
     
     locations.eachLayer(function(layer) {
         if (layer.options && layer.options.location_data) {
             markerCount++;
-            // Make the marker draggable
-            layer.dragging.enable();
             
-            // Add event listener for when dragging ends
-            layer.on('dragend', function(event) {
-                const marker = event.target;
-                const position = marker.getLatLng();
-                
-                // Update the location data with the new position
-                marker.options.location_data.latlng = [position.lat, position.lng];
-                
-                // Add this location to the set of moved locations
-                movedLocations.add(marker.options.id);
-                
-                // Enable save button
-                const saveButton = document.querySelector('.leaflet-control.leaflet-bar a[title="Save All"]');
-                if (saveButton) {
-                    saveButton.style.opacity = '1';
-                    saveButton.style.pointerEvents = 'auto';
-                }
+            // Add event listener for when dragging ends (only once)
+            if (!layer._hasSetupDragend) {
+                layer._hasSetupDragend = true;
+                layer.on('dragend', function(event) {
+                    const marker = event.target;
+                    const position = marker.getLatLng();
+                    
+                    // Update the location data with the new position
+                    marker.options.location_data.latlng = [position.lat, position.lng];
+                    
+                    // Add this location to the set of moved locations
+                    movedLocations.add(marker.options.id);
+                    
+                    // Enable save button
+                    const saveButton = document.querySelector('.leaflet-control.leaflet-bar a[title="Save All"]');
+                    if (saveButton) {
+                        saveButton.style.opacity = '1';
+                        saveButton.style.pointerEvents = 'auto';
+                    }
 
-                console.log(`Marker ${marker.options.id} moved to [${position.lat}, ${position.lng}]`);
-                notyf.success(`Location "${marker.options.location_data.name}" moved`);
-            });
+                    console.log(`Marker ${marker.options.id} moved to [${position.lat}, ${position.lng}]`);
+                    notyf.success(`Location "${marker.options.location_data.name}" moved`);
+                });
+            }
+            
+            // Start with dragging disabled (viewing mode)
+            layer.dragging.disable();
         }
     });
 
     if (markerCount === 0) {
         // If no markers were found, try again after a short delay
-        setTimeout(makeMarkersMovable, 1000);
+        console.log("No markers found, will retry in 500ms");
+        setTimeout(makeMarkersMovable, 500);
     } else {
-        notyf.success(`Editor functionality enabled.`);
+        console.log(`${markerCount} markers set up successfully.`);
     }
+}
+
+// Enable dragging for all markers
+function enableMarkerDragging() {
+    console.log("Enabling marker dragging...");
+    
+    locations.eachLayer(function(layer) {
+        if (layer.options && layer.options.location_data) {
+            layer.dragging.enable();
+        }
+    });
+}
+
+// Disable dragging for all markers
+function disableMarkerDragging() {
+    console.log("Disabling marker dragging...");
+    
+    locations.eachLayer(function(layer) {
+        if (layer.options && layer.options.location_data) {
+            layer.dragging.disable();
+        }
+    });
 }
 
 async function saveAll() {
@@ -239,11 +325,11 @@ async function saveAll() {
     });
 
     if (locationsToSave.length === 0) {
-        notyf.error('No moved locations to save');
+        notyf.error('No locations to save');
         return;
     }
 
-    if (!confirm(`Save ${locationsToSave.length} moved locations?`)) {
+    if (!confirm(`Save ${locationsToSave.length} changed locations?`)) {
         return;
     }
 
@@ -282,7 +368,7 @@ async function saveAll() {
 
     // Show result notification
     if (failureCount === 0) {
-        notyf.success('All moved locations saved successfully');
+        notyf.success('All changed locations saved successfully');
         // Clear the moved locations set after successful save
         movedLocations.clear();
         // Disable save button

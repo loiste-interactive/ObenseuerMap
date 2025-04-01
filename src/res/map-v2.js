@@ -106,9 +106,34 @@ docReady(function() { // for great js COMPATIBILITY (see docready.js, this shit 
 	L.control.attribution({prefix: '<a href="https://github.com/loiste-interactive/ObenseuerMap">Contribute on GitHub</a> | Made by <a href="https://d7.wtf/">deseven</a> &amp; Nextej | Based on original <a href="https://loisteinteractive.com/">Loiste</a> maps | Powered by <a href="https://leafletjs.com/">Leaflet</a>'}).addTo(map);
 
 	map.addLayer(locations);
+	
+	// Function to handle hash-based navigation after locations are loaded
+	function processLocationHash() {
+		if (window.location.hash.substring(1)) {
+			var loc, safeHash;
+			if (window.location.hash.substring(1).toLowerCase().startsWith('loc:')) {
+				loc = window.location.hash.substring(1).toLowerCase().split(':');
+				loc = loc[1].split(',');
+				map.setView([loc[0],loc[1]],loc[2]);
+			} else {
+				locations.eachLayer(function(l){
+					if (l.options.id == window.location.hash.substring(1)) {
+						map.setView(l.getLatLng());
+						l.togglePopup();
+					}
+				});
+			}
+		}
+	}
+	
+	// Load locations first, then process any hash in the URL
 	fetch('https://obenseuer.stalburg.net/locations/getall')
 		.then(response => response.json())
-		.then(data => data.forEach(addLocation))
+		.then(data => {
+			data.forEach(addLocation);
+			// After all locations are loaded, process the hash
+			processLocationHash();
+		})
 		.catch(error => console.error('Error loading locations:', error));
 
 	var baseLayers = {
@@ -143,44 +168,30 @@ docReady(function() { // for great js COMPATIBILITY (see docready.js, this shit 
 		promptCoordinates = true;
 	}
 
-	if (window.location.hash.substring(1) || window.location.search.includes('maintenance-login') || sessionStorage.getItem('token')) {
-		var loc,safeHash;
-		if (window.location.search.includes('maintenance-login') || sessionStorage.getItem('token')) {
-			// Load PathDrag extension first if not already loaded
-			if (typeof L.Handler.PathDrag === 'undefined') {
-				var pathDrag = document.createElement('script');
-				pathDrag.onload = function() {
-					// Then load editor script
-					var editor = document.createElement('script');
-					editor.onload = function () {
-						editorLogin();
-					};
-					editor.src = "res/editor.js";
-					document.head.appendChild(editor);
-				};
-				pathDrag.src = "res/Leaflet.PathDrag.js";
-				document.head.appendChild(pathDrag);
-			} else {
-				// If PathDrag is already loaded, just load the editor
+	// Handle editor login if needed
+	if (window.location.search.includes('maintenance-login') || sessionStorage.getItem('token')) {
+		// Load PathDrag extension first if not already loaded
+		if (typeof L.Handler.PathDrag === 'undefined') {
+			var pathDrag = document.createElement('script');
+			pathDrag.onload = function() {
+				// Then load editor script
 				var editor = document.createElement('script');
 				editor.onload = function () {
 					editorLogin();
 				};
 				editor.src = "res/editor.js";
 				document.head.appendChild(editor);
-			}
-		} else if (window.location.hash.substring(1).toLowerCase().startsWith('loc:')) {
-			loc = window.location.hash.substring(1).toLowerCase().split(':');
-			loc = loc[1].split(',');
-			map.setView([loc[0],loc[1]],loc[2]);
+			};
+			pathDrag.src = "res/Leaflet.PathDrag.js";
+			document.head.appendChild(pathDrag);
 		} else {
-			locations.eachLayer(function(l){
-				//console.log(l.options.id);
-				if (l.options.id == window.location.hash.substring(1)) {
-					map.setView(l.getLatLng());
-					l.togglePopup();
-				}
-			});
+			// If PathDrag is already loaded, just load the editor
+			var editor = document.createElement('script');
+			editor.onload = function () {
+				editorLogin();
+			};
+			editor.src = "res/editor.js";
+			document.head.appendChild(editor);
 		}
 	}
 

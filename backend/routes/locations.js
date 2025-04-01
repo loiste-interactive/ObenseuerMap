@@ -4,12 +4,20 @@ const db = require('../database');
 const { sendResponse, sendError } = require('../utils');
 const { verifyAuth } = require('../middleware/auth');
 
+// Cache for storing locations
+let locationsCache = null;
+let isCacheLoading = false;
+
 /**
- * Get all locations with sublocations
- * GET /getall
+ * Load all locations from the database into the cache
  */
-router.get('/locations/getall', async (req, res) => {
+async function loadLocationsCache() {
+  if (isCacheLoading) return;
+  
+  isCacheLoading = true;
   try {
+    console.log('Loading locations into cache...');
+    
     // Get main locations
     const locations = await db.query(`
       SELECT id, name, category, lat, lng, image, description
@@ -48,7 +56,32 @@ router.get('/locations/getall', async (req, res) => {
       return formattedLocation;
     }));
     
-    sendResponse(res, formattedLocations);
+    locationsCache = formattedLocations;
+    console.log(`Loaded ${locationsCache.length} locations into cache`);
+  } catch (error) {
+    console.error('Error loading locations cache:', error);
+    // If there was an error, set cache to empty array to avoid null checks
+    locationsCache = [];
+  } finally {
+    isCacheLoading = false;
+  }
+}
+
+// The cache will be loaded by index.js on server startup
+
+/**
+ * Get all locations with sublocations
+ * GET /getall
+ */
+router.get('/locations/getall', async (req, res) => {
+  try {
+    // If cache is not loaded yet, try to load it
+    if (locationsCache === null) {
+      await loadLocationsCache();
+    }
+    
+    // Return cached locations
+    sendResponse(res, locationsCache || []);
   } catch (error) {
     console.error('Error fetching locations:', error);
     sendError(res, 'Failed to fetch locations');
@@ -161,6 +194,11 @@ router.post('/locations/save', verifyAuth, async (req, res) => {
       }
     }
     
+    // Reload the locations cache after saving
+    loadLocationsCache().catch(err => {
+      console.error('Failed to reload locations cache after save:', err);
+    });
+    
     sendResponse(res, { success: true, id: location.id });
   } catch (error) {
     console.error('Error saving location:', error);
@@ -170,3 +208,4 @@ router.post('/locations/save', verifyAuth, async (req, res) => {
 
 
 module.exports = router;
+module.exports.loadLocationsCache = loadLocationsCache;

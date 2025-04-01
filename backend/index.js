@@ -39,9 +39,24 @@ app.use((err, req, res, next) => {
 // Start server
 const PORT = config.server.port;
 app.listen(PORT, async () => {
-  // Test database connection
-  await db.testConnection();
-  console.log(`Server running on port ${PORT}`);
+  try {
+    // Test database connection - this is critical
+    const dbConnected = await db.testConnection();
+    if (!dbConnected) {
+      console.error('Database connection failed - this is a critical error');
+      process.exit(1);
+    }
+    
+    // Pre-load locations data into cache
+    console.log('Pre-loading locations data into cache...');
+    await locationsRoutes.loadLocationsCache();
+    console.log('Locations cache loaded successfully');
+    
+    console.log(`Server running on port ${PORT}`);
+  } catch (error) {
+    console.error('Failed to start server properly:', error);
+    process.exit(1);
+  }
 });
 
 // Handle graceful shutdown
