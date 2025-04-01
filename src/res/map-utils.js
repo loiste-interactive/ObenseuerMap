@@ -140,15 +140,16 @@ function addLocationMarker(layerGroup, location) {
         }
     );
     
-    // Bind popup and click event
-    marker.bindPopup(location.html, { 
-        maxWidth: 400, 
-        minWidth: 400, 
-        className: location.class, 
-        closeButton: false 
+    // Bind popup
+    marker.bindPopup(location.html, {
+        maxWidth: 400,
+        minWidth: 400,
+        className: location.class,
+        closeButton: false
     });
     
-    marker.on('click', function () { 
+    // Default click behavior - this will be updated if in edit mode
+    marker.on('click', function () {
         setHash(location.id);
     });
     

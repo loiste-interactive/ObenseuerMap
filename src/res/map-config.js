@@ -77,7 +77,10 @@ const API_ENDPOINTS = {
     getAllLocations: 'https://obenseuer.stalburg.net/locations/getall',
     checkToken: '/locations/checktoken',
     login: '/locations/login',
-    saveLocation: '/locations/save'
+    saveLocation: '/locations/save',
+    getCategories: '/locations/getcategories',
+    getImages: '/locations/getimages',
+    deleteLocation: '/locations/delete/'
 };
 
 /**

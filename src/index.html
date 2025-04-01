@@ -87,7 +87,15 @@
 			padding: 20px;
 			font-family: Arial, sans-serif;
 			color: #333;
+			width: 100%;
+			position: relative;
+			display: flex;
+			flex-wrap: wrap;
+			gap: 20px;
+			box-sizing: border-box;
+			max-width: 100%;
 		">
+			<div style="flex: 1; min-width: 300px;">
 			<div style="margin-bottom: 15px;">
 				<label for="location-id" style="display: block; margin-bottom: 5px; font-weight: bold;">ID:</label>
 				<input type="text" id="location-id" name="id" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
@@ -124,9 +132,10 @@
 					<span>Has sublocations</span>
 				</label>
 			</div>
+			</div>
 			
 			<!-- Sublocations Container -->
-			<div id="sublocations-container" style="display: none; margin-bottom: 15px; border: 1px solid #ddd; padding: 10px; border-radius: 4px;">
+			<div id="sublocations-container" style="display: none; margin-bottom: 15px; border: 1px solid #ddd; padding: 10px; border-radius: 4px; flex: 1; min-width: 300px; max-height: 500px; overflow-y: auto; box-sizing: border-box;">
 				<h3 style="margin-top: 0;">Sublocations</h3>
 				<div id="sublocations-list">
 					<!-- Sublocations will be added here dynamically -->
@@ -136,22 +145,24 @@
 				</button>
 			</div>
 			
-			<div style="display: flex; justify-content: space-between; margin-top: 20px;">
-				<button type="button" id="cancel-edit" style="padding: 10px; background-color: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; width: 30%;">
-					Cancel
-				</button>
-				<button type="button" id="delete-location" style="padding: 10px; background-color: #ff9800; color: white; border: none; border-radius: 4px; cursor: pointer; width: 30%;">
-					Delete
-				</button>
-				<button type="submit" id="save-location" style="padding: 10px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; width: 30%;">
-					Save
-				</button>
+			<div style="width: 100%; box-sizing: border-box; margin-top: 20px;">
+				<div style="display: flex; justify-content: space-between; gap: 15px;">
+					<button type="button" id="cancel-edit" style="padding: 10px; background-color: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; flex: 1;">
+						Cancel
+					</button>
+					<button type="button" id="delete-location" style="padding: 10px; background-color: #ff9800; color: white; border: none; border-radius: 4px; cursor: pointer; flex: 1;">
+						Delete
+					</button>
+					<button type="submit" id="save-location" style="padding: 10px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; flex: 1;">
+						OK
+					</button>
+				</div>
 			</div>
 		</form>
 	</div>
 	
 	<!-- Sublocation Template (hidden, will be cloned by JavaScript) -->
-	<div id="sublocation-template" style="display: none; margin-bottom: 15px; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+	<div id="sublocation-template" style="display: none; margin-bottom: 15px; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; width: 100%;">
 		<div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
 			<h4 style="margin: 0;">Sublocation</h4>
 			<button type="button" class="remove-sublocation" style="background-color: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; padding: 2px 8px;">
@@ -161,26 +172,26 @@
 		
 		<div style="margin-bottom: 10px;">
 			<label style="display: block; margin-bottom: 5px; font-weight: bold;">Name:</label>
-			<input type="text" class="sublocation-name" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+			<input type="text" class="sublocation-name" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; max-width: 100%;">
 		</div>
 		
 		<div style="margin-bottom: 10px;">
 			<label style="display: block; margin-bottom: 5px; font-weight: bold;">Category:</label>
-			<select class="sublocation-category" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+			<select class="sublocation-category" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; max-width: 100%;">
 				<!-- Options will be populated by JavaScript -->
 			</select>
 		</div>
 		
 		<div style="margin-bottom: 10px;">
 			<label style="display: block; margin-bottom: 5px; font-weight: bold;">Image:</label>
-			<select class="sublocation-image" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+			<select class="sublocation-image" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; height: 35px; max-width: 100%;">
 				<!-- Options will be populated by JavaScript -->
 			</select>
 		</div>
 		
 		<div style="margin-bottom: 10px;">
 			<label style="display: block; margin-bottom: 5px; font-weight: bold;">Description:</label>
-			<textarea class="sublocation-description" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; min-height: 80px;"></textarea>
+			<textarea class="sublocation-description" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; min-height: 80px; max-width: 100%;"></textarea>
 		</div>
 	</div>
 </body>
