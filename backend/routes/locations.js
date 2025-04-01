@@ -30,7 +30,7 @@ async function loadLocationsCache() {
       const formattedLocation = {
         id: location.id,
         name: location.name,
-        icon: `${location.category}.png`,
+        category: location.category,
         latlng: [parseFloat(location.lat), parseFloat(location.lng)],
         image: location.image,
         description: location.description
@@ -47,7 +47,7 @@ async function loadLocationsCache() {
       if (sublocations.length > 0) {
         formattedLocation.sublocs = sublocations.map(subloc => ({
           name: subloc.name,
-          icon: `${subloc.category}.png`,
+          category: subloc.category,
           image: subloc.image,
           description: subloc.description
         }));
@@ -177,7 +177,7 @@ router.post('/locations/save', verifyAuth, async (req, res) => {
       
       // Then insert new sublocations
       for (const subloc of location.sublocs) {
-        if (!subloc.name || !subloc.icon || !subloc.image) {
+        if (!subloc.name || (!subloc.category && !subloc.icon) || !subloc.image) {
           continue; // Skip invalid sublocations
         }
         
@@ -187,7 +187,7 @@ router.post('/locations/save', verifyAuth, async (req, res) => {
         `, [
           location.id,
           subloc.name,
-          subloc.icon.replace('.png', ''), // Remove .png if present
+          subloc.category || subloc.icon.replace('.png', ''), // Use category or clean icon if present
           subloc.image,
           subloc.description || null
         ]);

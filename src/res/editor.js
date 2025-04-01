@@ -245,43 +245,64 @@ function toggleEditMode() {
     }
 }
 
+// Helper function to iterate over all location markers across all layer groups
+function forEachLocationMarker(callback) {
+    let count = 0;
+    
+    // Iterate through all layers in the map
+    Object.values(map._layers).forEach(function(layer) {
+        // Check if this is a layer group (not the base tile layer)
+        if (layer instanceof L.LayerGroup && !(layer instanceof L.TileLayer)) {
+            // Skip the base layer
+            if (layer._url && layer._url.includes('tiles/base')) {
+                return;
+            }
+            
+            // Process each marker in the layer group
+            layer.eachLayer(function(marker) {
+                if (marker.options && marker.options.location_data) {
+                    callback(marker);
+                    count++;
+                }
+            });
+        }
+    });
+    
+    return count;
+}
+
 // Initialize markers with event listeners but keep dragging disabled by default
 function makeMarkersMovable() {
     console.log("Setting up markers...");
-    let markerCount = 0;
     
-    locations.eachLayer(function(layer) {
-        if (layer.options && layer.options.location_data) {
-            markerCount++;
-            
-            // Add event listener for when dragging ends (only once)
-            if (!layer._hasSetupDragend) {
-                layer._hasSetupDragend = true;
-                layer.on('dragend', function(event) {
-                    const marker = event.target;
-                    const position = marker.getLatLng();
-                    
-                    // Update the location data with the new position
-                    marker.options.location_data.latlng = [position.lat, position.lng];
-                    
-                    // Add this location to the set of moved locations
-                    movedLocations.add(marker.options.id);
-                    
-                    // Enable save button
-                    const saveButton = document.querySelector('.leaflet-control.leaflet-bar a[title="Save All"]');
-                    if (saveButton) {
-                        saveButton.style.opacity = '1';
-                        saveButton.style.pointerEvents = 'auto';
-                    }
+    const markerCount = forEachLocationMarker(function(layer) {
+        // Add event listener for when dragging ends (only once)
+        if (!layer._hasSetupDragend) {
+            layer._hasSetupDragend = true;
+            layer.on('dragend', function(event) {
+                const marker = event.target;
+                const position = marker.getLatLng();
+                
+                // Update the location data with the new position
+                marker.options.location_data.latlng = [position.lat, position.lng];
+                
+                // Add this location to the set of moved locations
+                movedLocations.add(marker.options.id);
+                
+                // Enable save button
+                const saveButton = document.querySelector('.leaflet-control.leaflet-bar a[title="Save All"]');
+                if (saveButton) {
+                    saveButton.style.opacity = '1';
+                    saveButton.style.pointerEvents = 'auto';
+                }
 
-                    console.log(`Marker ${marker.options.id} moved to [${position.lat}, ${position.lng}]`);
-                    notyf.success(`Location "${marker.options.location_data.name}" moved`);
-                });
-            }
-            
-            // Start with dragging disabled (viewing mode)
-            layer.dragging.disable();
+                console.log(`Marker ${marker.options.id} moved to [${position.lat}, ${position.lng}]`);
+                notyf.success(`Location "${marker.options.location_data.name}" moved`);
+            });
         }
+        
+        // Start with dragging disabled (viewing mode)
+        layer.dragging.disable();
     });
 
     if (markerCount === 0) {
@@ -296,30 +317,24 @@ function makeMarkersMovable() {
 // Enable dragging for all markers
 function enableMarkerDragging() {
     console.log("Enabling marker dragging...");
-    
-    locations.eachLayer(function(layer) {
-        if (layer.options && layer.options.location_data) {
-            layer.dragging.enable();
-        }
+    forEachLocationMarker(function(layer) {
+        layer.dragging.enable();
     });
 }
 
 // Disable dragging for all markers
 function disableMarkerDragging() {
     console.log("Disabling marker dragging...");
-    
-    locations.eachLayer(function(layer) {
-        if (layer.options && layer.options.location_data) {
-            layer.dragging.disable();
-        }
+    forEachLocationMarker(function(layer) {
+        layer.dragging.disable();
     });
 }
 
 async function saveAll() {
     // Get only the moved locations from the map
     const locationsToSave = [];
-    locations.eachLayer(function (layer) {
-        if (layer.options && layer.options.location_data && movedLocations.has(layer.options.id)) {
+    forEachLocationMarker(function(layer) {
+        if (movedLocations.has(layer.options.id)) {
             locationsToSave.push(layer.options.location_data);
         }
     });
@@ -346,9 +361,10 @@ async function saveAll() {
 
     for (const location of locationsToSave) {
         try {
-            // Make sure location has category field (derived from icon if needed)
+            // Make sure location has category field (legacy support)
             if (location.icon && !location.category) {
-                location.category = location.icon;
+                // Remove .png extension if present
+                location.category = location.icon.replace('.png', '');
             }
             
             // Save the location
