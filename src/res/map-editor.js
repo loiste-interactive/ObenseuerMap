@@ -9,6 +9,7 @@ let button_save_all;
 let button_logout;
 let button_toggle_mode;
 let button_create_location;
+let button_media_editor;
 let editedLocations = new Set(); // Track which locations have been edited
 let isEditingMode = false; // Default to viewing mode for logged-in users
 let isCreatingLocation = false; // Flag to track if we're in location creation mode
@@ -17,7 +18,7 @@ let images = []; // Store available images
 
 // Initialize notification system (assuming Notyf is included in the main HTML)
 const notyf = new Notyf({
-    duration: 2000,
+    duration: 3000,
     position: {
         x: 'center',
         y: 'bottom',
@@ -182,6 +183,32 @@ function initializeEditorInterface() {
         }
     });
 
+    // Create media editor button control
+    L.button_media_editor = L.Control.extend({
+        options: {
+            name: 'Media Editor',
+            position: 'topleft',
+            html: '<span class="fas fa-images"></span>',
+            callback: function() {
+                window.location.href = '/locations/media';
+            }
+        },
+        onAdd: function(map) {
+            var container = L.DomUtil.create('div', 'leaflet-control leaflet-bar'),
+                link = L.DomUtil.create('a', '', container);
+
+            link.href = '#';
+            link.title = this.options.name;
+            link.innerHTML = this.options.html;
+            L.DomEvent.on(link, 'click', L.DomEvent.stop)
+                .on(link, 'click', function() {
+                    this.options.callback.call();
+                }, this);
+
+            return container;
+        }
+    });
+
     // Create save button control
     L.button_save_all = L.Control.extend({
         options: {
@@ -236,7 +263,7 @@ function initializeEditorInterface() {
     L.button_logout = L.Control.extend({
         options: {
             name: 'Log Out',
-            position: 'topleft',
+            position: 'bottomleft',
             html: '<span class="fas fa-sign-out-alt"></span>',
         },
         onAdd: function(map) {
@@ -260,6 +287,7 @@ function initializeEditorInterface() {
     button_toggle_mode = new L.button_toggle_mode();
     button_save_all = new L.button_save_all();
     button_create_location = new L.button_create_location();
+    button_media_editor = new L.button_media_editor();
     button_logout = new L.button_logout();
     map.addControl(button_toggle_mode);
     map.addControl(button_logout);
@@ -337,6 +365,7 @@ function toggleEditMode() {
             
             // Add edit mode buttons
             map.addControl(button_create_location);
+            map.addControl(button_media_editor);
             map.addControl(button_save_all);
             
             // Update save button state based on whether there are edited locations
@@ -358,6 +387,7 @@ function toggleEditMode() {
             
             // Remove edit mode buttons
             map.removeControl(button_save_all);
+            map.removeControl(button_media_editor);
             map.removeControl(button_create_location);
         }
     }

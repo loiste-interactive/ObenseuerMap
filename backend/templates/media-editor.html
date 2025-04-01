@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Media Editor</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
+  <style>
+    body {
+      padding: 20px;
+      background-color: #f8f9fa;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .media-section {
+      background-color: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .media-list {
+      height: 500px;
+      overflow-y: auto;
+      border: 1px solid #dee2e6;
+      border-radius: 4px;
+      padding: 10px;
+      margin-bottom: 15px;
+    }
+    .media-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px;
+      border-bottom: 1px solid #eee;
+    }
+    .media-item:last-child {
+      border-bottom: none;
+    }
+    .media-item img {
+      margin-right: 10px;
+    }
+    .media-item .delete-btn {
+      color: #dc3545;
+      cursor: pointer;
+    }
+    .upload-form {
+      margin-top: 15px;
+    }
+    .preview-category {
+      max-width: 64px;
+      max-height: 64px;
+      object-fit: contain;
+    }
+    .preview-image {
+      max-width: 100px;
+      max-height: 100px;
+      object-fit: contain;
+    }
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .logout-btn {
+      cursor: pointer;
+      color: #dc3545;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header-bar">
+      <h1>Media Editor</h1>
+      <span class="logout-btn" onclick="logout()">Back to the map</span>
+    </div>
+    
+    <div class="row">
+      <!-- Categories Section -->
+      <div class="col-md-6">
+        <div class="media-section">
+          <h2>Categories</h2>
+          <div class="media-list" id="categories-list">
+            <!-- Categories will be loaded here -->
+          </div>
+          <div class="upload-form">
+            <form id="upload-category-form" enctype="multipart/form-data">
+              <div class="mb-3">
+                <label for="category-file" class="form-label">Select PNG icon (200x200px)</label>
+                <input class="form-control" type="file" id="category-file" accept=".png">
+              </div>
+              <button type="submit" class="btn btn-primary">Add Category</button>
+            </form>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Images Section -->
+      <div class="col-md-6">
+        <div class="media-section">
+          <h2>Images</h2>
+          <div class="media-list" id="images-list">
+            <!-- Images will be loaded here -->
+          </div>
+          <div class="upload-form">
+            <form id="upload-image-form" enctype="multipart/form-data">
+              <div class="mb-3">
+                <label for="image-file" class="form-label">Select JPEG image (400x400px)</label>
+                <input class="form-control" type="file" id="image-file" accept=".jpg,.jpeg">
+              </div>
+              <button type="submit" class="btn btn-primary">Add Image</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
+  <script>
+    // Create an instance of Notyf
+    var notyf = new Notyf({
+      duration: 3000,
+      position: { x: 'center', y: 'bottom' }
+    });
+
+    // Check if user is authenticated
+    document.addEventListener('DOMContentLoaded', function() {
+      const token = sessionStorage.getItem('token');
+      if (!token) {
+        window.location.href = '/';
+        return;
+      }
+
+      // Load media data
+      loadCategories();
+      loadImages();
+      
+      // Set up form event listeners
+      document.getElementById('upload-category-form').addEventListener('submit', uploadCategory);
+      document.getElementById('upload-image-form').addEventListener('submit', uploadImage);
+    });
+
+    // Logout function
+    function logout() {
+      //sessionStorage.removeItem('token');
+      window.location.href = '/';
+    }
+
+    // Load categories
+    async function loadCategories() {
+      try {
+        const response = await fetch('/locations/getcategories', {
+          headers: {
+            'x-token': sessionStorage.getItem('token')
+          }
+        });
+        
+        if (!response.ok) {
+          if (response.status === 403) {
+            sessionStorage.removeItem('token');
+            window.location.href = '/';
+            return;
+          }
+          throw new Error('Failed to load categories');
+        }
+        
+        const categories = await response.json();
+        const categoriesList = document.getElementById('categories-list');
+        categoriesList.innerHTML = '';
+        
+        categories.forEach(category => {
+          const item = document.createElement('div');
+          item.className = 'media-item';
+          item.innerHTML = `
+            <div>
+              <img src="/res/images/icons/${category}.png" alt="${category}" class="preview-category">
+              <span>${category}</span>
+            </div>
+            <span class="delete-btn" onclick="deleteCategory('${category}')">Delete</span>
+          `;
+          categoriesList.appendChild(item);
+        });
+      } catch (error) {
+        console.error('Error loading categories:', error);
+        notyf.error('Failed to load categories');
+      }
+    }
+
+    // Load images
+    async function loadImages() {
+      try {
+        const response = await fetch('/locations/getimages', {
+          headers: {
+            'x-token': sessionStorage.getItem('token')
+          }
+        });
+        
+        if (!response.ok) {
+          if (response.status === 403) {
+            sessionStorage.removeItem('token');
+            window.location.href = '/';
+            return;
+          }
+          throw new Error('Failed to load images');
+        }
+        
+        const images = await response.json();
+        const imagesList = document.getElementById('images-list');
+        imagesList.innerHTML = '';
+        
+        images.forEach(image => {
+          const item = document.createElement('div');
+          item.className = 'media-item';
+          item.innerHTML = `
+            <div>
+              <img src="/res/images/locations/${image}" alt="${image}" class="preview-image">
+              <span>${image}</span>
+            </div>
+            <span class="delete-btn" onclick="deleteImage('${image}')">Delete</span>
+          `;
+          imagesList.appendChild(item);
+        });
+      } catch (error) {
+        console.error('Error loading images:', error);
+        notyf.error('Failed to load images');
+      }
+    }
+
+    // Upload category
+    async function uploadCategory(event) {
+      event.preventDefault();
+      
+      const fileInput = document.getElementById('category-file');
+      if (!fileInput.files || fileInput.files.length === 0) {
+        notyf.error('Please select a PNG file');
+        return;
+      }
+      
+      const file = fileInput.files[0];
+      if (!file.type.includes('png')) {
+        notyf.error('Only PNG files are allowed');
+        return;
+      }
+      
+      const formData = new FormData();
+      formData.append('icon', file);
+      
+      try {
+        const response = await fetch('/locations/addcategory', {
+          method: 'POST',
+          headers: {
+            'x-token': sessionStorage.getItem('token')
+          },
+          body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+          notyf.success('Category added successfully');
+          fileInput.value = '';
+          loadCategories();
+        } else {
+          notyf.error(result.error || 'Failed to add category');
+        }
+      } catch (error) {
+        console.error('Error uploading category:', error);
+        notyf.error('Failed to upload category');
+      }
+    }
+
+    // Upload image
+    async function uploadImage(event) {
+      event.preventDefault();
+      
+      const fileInput = document.getElementById('image-file');
+      if (!fileInput.files || fileInput.files.length === 0) {
+        notyf.error('Please select a JPEG file');
+        return;
+      }
+      
+      const file = fileInput.files[0];
+      if (!file.type.includes('jpeg') && !file.type.includes('jpg')) {
+        notyf.error('Only JPEG files are allowed');
+        return;
+      }
+      
+      const formData = new FormData();
+      formData.append('image', file);
+      
+      try {
+        const response = await fetch('/locations/addimage', {
+          method: 'POST',
+          headers: {
+            'x-token': sessionStorage.getItem('token')
+          },
+          body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+          notyf.success('Image added successfully');
+          fileInput.value = '';
+          loadImages();
+        } else {
+          notyf.error(result.error || 'Failed to add image');
+        }
+      } catch (error) {
+        console.error('Error uploading image:', error);
+        notyf.error('Failed to upload image');
+      }
+    }
+
+    // Delete category
+    async function deleteCategory(category) {
+      if (!confirm(`Are you sure you want to delete the category "${category}"?`)) {
+        return;
+      }
+      
+      try {
+        const response = await fetch(`/locations/deletecategory/${category}`, {
+          method: 'DELETE',
+          headers: {
+            'x-token': sessionStorage.getItem('token')
+          }
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+          notyf.success('Category deleted successfully');
+          loadCategories();
+        } else {
+          notyf.error(result.error || 'Failed to delete category');
+        }
+      } catch (error) {
+        console.error('Error deleting category:', error);
+        notyf.error('Failed to delete category');
+      }
+    }
+
+    // Delete image
+    async function deleteImage(image) {
+      if (!confirm(`Are you sure you want to delete the image "${image}"?`)) {
+        return;
+      }
+      
+      try {
+        const response = await fetch(`/locations/deleteimage/${image}`, {
+          method: 'DELETE',
+          headers: {
+            'x-token': sessionStorage.getItem('token')
+          }
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+          notyf.success('Image deleted successfully');
+          loadImages();
+        } else {
+          notyf.error(result.error || 'Failed to delete image');
+        }
+      } catch (error) {
+        console.error('Error deleting image:', error);
+        notyf.error('Failed to delete image');
+      }
+    }
+  </script>
+</body>
+</html>
