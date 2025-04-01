@@ -41,8 +41,6 @@ const upload = multer({
  */
 router.get('/locations/getcategories', verifyAuth, (req, res) => {
   try {
-    console.log("!!!");
-    console.log(__dirname);
     const iconsDir = path.join(__dirname, '../../dist/res/images/icons');
     
     // Read all files in the directory
