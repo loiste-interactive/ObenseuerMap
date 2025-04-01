@@ -801,7 +801,8 @@ function showLocationEditForm(location) {
     // Add form container as Leaflet dialog
     const editDialog = L.control.dialog({
         size: [1024, 'auto'],
-        position: 'topleft',
+        //position: 'topleft',
+        anchor: [ 100, 100 ],
         'min-width': '600px',
         'max-width': '90%',
         minSize: [600, 'auto'],
