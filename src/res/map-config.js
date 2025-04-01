@@ -17,6 +17,7 @@ const LAYER_GROUPS = {
     toilets: L.layerGroup(),
     shops: L.layerGroup(),
     vending: L.layerGroup(),
+    jobs: L.layerGroup(),
     tenements: L.layerGroup(),
     pois: L.layerGroup()
 };
@@ -48,6 +49,9 @@ const CATEGORY_MAPPING = {
     
     // Vending
     'LM_Vending': 'vending',
+
+    // Jobs
+    'LM_Job': 'jobs',
     
     // Tenements
     'LM_Tenement_A': 'tenements',
@@ -69,6 +73,7 @@ const LAYER_LABELS = {
     shops: '<span class="fas fa-shopping-cart"></span> Shops',
     vending: '<span class="fas fa-cookie-bite"></span> Vending Machines',
     tenements: '<span class="fas fa-home"></span> Tenements',
+    jobs: '<span class="fas fa-briefcase"></span> Jobs',
     pois: '<span class="fas fa-map-marker-alt"></span> Points of Interest'
 };
 
@@ -135,10 +140,79 @@ function initializeMap() {
         overlayMaps[LAYER_LABELS[key]] = LAYER_GROUPS[key];
     });
 
-    L.control.layers(baseLayers, overlayMaps, {
+    // Add layer control
+    const layerControl = L.control.layers(baseLayers, overlayMaps, {
         collapsed: false,
         hideSingleBase: true
     }).addTo(map);
+    
+    // Add Select All / Deselect All buttons to the layer control
+    const layerControlContainer = layerControl.getContainer();
+    const selectAllContainer = document.createElement('div');
+    selectAllContainer.className = 'leaflet-control-layers-select-all';
+    selectAllContainer.style.padding = '6px 10px 6px 6px';
+    selectAllContainer.style.borderTop = '1px solid #ddd';
+    selectAllContainer.style.marginTop = '5px';
+    selectAllContainer.style.textAlign = 'center';
+    
+    // Create Select All button
+    const selectAllButton = document.createElement('button');
+    selectAllButton.innerHTML = '<span class="fas fa-check-square"></span>';
+    selectAllButton.title = 'Select All Layers';
+    selectAllButton.style.marginRight = '10px';
+    selectAllButton.style.padding = '4px 6px';
+    selectAllButton.style.cursor = 'pointer';
+    selectAllButton.style.background = 'none';
+    selectAllButton.style.border = 'none';
+    selectAllButton.style.fontSize = '16px';
+    selectAllButton.style.color = '#555';
+    
+    // Create Deselect All button
+    const deselectAllButton = document.createElement('button');
+    deselectAllButton.innerHTML = '<span class="fas fa-square"></span>';
+    deselectAllButton.title = 'Deselect All Layers';
+    deselectAllButton.style.padding = '4px 6px';
+    deselectAllButton.style.cursor = 'pointer';
+    deselectAllButton.style.background = 'none';
+    deselectAllButton.style.border = 'none';
+    deselectAllButton.style.fontSize = '16px';
+    deselectAllButton.style.color = '#555';
+    
+    // Add event listeners
+    selectAllButton.addEventListener('click', function() {
+        Object.values(LAYER_GROUPS).forEach(layer => {
+            if (!map.hasLayer(layer)) {
+                map.addLayer(layer);
+            }
+        });
+        
+        // Update checkboxes in the layer control
+        const checkboxes = layerControlContainer.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = true;
+        });
+    });
+    
+    deselectAllButton.addEventListener('click', function() {
+        Object.values(LAYER_GROUPS).forEach(layer => {
+            if (map.hasLayer(layer)) {
+                map.removeLayer(layer);
+            }
+        });
+        
+        // Update checkboxes in the layer control
+        const checkboxes = layerControlContainer.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = false;
+        });
+    });
+    
+    // Add buttons to container
+    selectAllContainer.appendChild(selectAllButton);
+    selectAllContainer.appendChild(deselectAllButton);
+    
+    // Add container to layer control
+    layerControlContainer.appendChild(selectAllContainer);
 
     // Add wiki back button if coming from the wiki
     if (document.referrer.indexOf("stalburg.arctar.us") > -1 || (document.referrer.indexOf("stalburg.net") > -1 && document.referrer.indexOf(".stalburg.net") == -1)) {

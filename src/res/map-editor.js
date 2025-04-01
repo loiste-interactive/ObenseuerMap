@@ -15,16 +15,7 @@ let isEditingMode = false; // Default to viewing mode for logged-in users
 let isCreatingLocation = false; // Flag to track if we're in location creation mode
 let categories = []; // Store available categories
 let images = []; // Store available images
-
-// Initialize notification system (assuming Notyf is included in the main HTML)
-const notyf = new Notyf({
-    duration: 3000,
-    position: {
-        x: 'center',
-        y: 'bottom',
-    },
-    ripple: false
-});
+let notyf; // Will be initialized in editorLogin
 
 /**
  * Initializes the editor login process
@@ -32,6 +23,16 @@ const notyf = new Notyf({
  */
 function editorLogin() {
     console.log("Editor initialization started");
+    
+    // Initialize notification system now that Notyf is loaded
+    notyf = new Notyf({
+        duration: 3000,
+        position: {
+            x: 'center',
+            y: 'bottom',
+        },
+        ripple: false
+    });
     
     if (sessionStorage.getItem('token')) {
         checkToken();
@@ -770,7 +771,7 @@ function showLocationEditForm(location) {
     formContainer.style.display = 'block';
     // Add form container as Leaflet dialog
     const editDialog = L.control.dialog({
-        size: [800, 'auto'],
+        size: [1024, 'auto'],
         position: 'topleft',
         'min-width': '600px',
         'max-width': '90%',
