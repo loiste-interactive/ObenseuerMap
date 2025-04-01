@@ -67,5 +67,5 @@ else
 
 	# replacing internal values with short commit id
 	sed -i "s/{MAPDEV}/$commit/g" dist/index.html
-	sed -i "s/{MAPDEV}/$commit/g" dist/res/map-v2.js
+	sed -i "s/{MAPDEV}/$commit/g" dist/res/map-config.js
 fi

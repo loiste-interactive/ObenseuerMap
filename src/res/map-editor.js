@@ -1,9 +1,17 @@
+/**
+ * Map Editor Logic
+ * Handles authentication, marker editing, and saving functionality for map editors
+ */
+
+// Editor state
 let logindialog;
 let button_save_all;
 let button_logout;
 let button_toggle_mode;
 let editedLocations = new Set(); // Track which locations have been edited
 let isEditingMode = false; // Default to viewing mode for logged-in users
+
+// Initialize notification system (assuming Notyf is included in the main HTML)
 const notyf = new Notyf({
     duration: 2000,
     position: {
@@ -13,39 +21,136 @@ const notyf = new Notyf({
     ripple: false
 });
 
+/**
+ * Initializes the editor login process
+ * Either validates existing token or shows login dialog
+ */
 function editorLogin() {
-    console.log("editor init");
+    console.log("Editor initialization started");
+    
     if (sessionStorage.getItem('token')) {
         checkToken();
     } else {
-        // Get the login form from the DOM
-        const loginFormContainer = document.getElementById('loginFormContainer');
-        const loginForm = document.getElementById('loginForm');
-        
-        // Create a dialog and add the login form to it
-        logindialog = L.control.dialog({
-            size: [400, 300],
-            position: 'topleft',
-            'min-width': '350px'
-        }).addTo(map);
-        
-        // Move the login form into the dialog
-        logindialog._container.querySelector('.leaflet-control-dialog-contents').appendChild(loginForm);
-        
-        // Show the dialog
-        logindialog.open();
-        
-        // Add event listener to the form
-        loginForm.addEventListener('submit', function (e) {
-            e.preventDefault();
-            login();
-        });
+        showLoginDialog();
     }
 }
 
-function editorInit() {
-    // Initialize in viewing mode by default
+/**
+ * Shows the login dialog
+ */
+function showLoginDialog() {
+    // Get the login form from the DOM
+    const loginFormContainer = document.getElementById('loginFormContainer');
+    const loginForm = document.getElementById('loginForm');
     
+    // Create a dialog and add the login form to it
+    logindialog = L.control.dialog({
+        size: [400, 300],
+        position: 'topleft',
+        'min-width': '350px'
+    }).addTo(map);
+    
+    // Move the login form into the dialog
+    logindialog._container.querySelector('.leaflet-control-dialog-contents').appendChild(loginForm);
+    
+    // Show the dialog
+    logindialog.open();
+    
+    // Add event listener to the form
+    loginForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        login();
+    });
+}
+
+/**
+ * Checks if the current token is valid
+ */
+function checkToken() {
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', MAP_CONFIG.API_ENDPOINTS.checkToken, true);
+    xhr.setRequestHeader('X-Token', sessionStorage.getItem('token'));
+    
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+            if (xhr.status === 200) {
+                console.log('Token valid');
+                initializeEditorInterface();
+            } else {
+                console.error('Token invalid');
+                sessionStorage.removeItem('token');
+                notyf.error('Session expired. Please login again.');
+                showLoginDialog();
+            }
+        }
+    };
+
+    xhr.send();
+}
+
+/**
+ * Handles user login
+ */
+async function login() {
+    const username = document.getElementById('user');
+    const password = document.getElementById('pw');
+    const button = document.getElementById('loginButton');
+    const errorDiv = document.getElementById('loginError');
+
+    // Disable form during login
+    username.disabled = true;
+    password.disabled = true;
+    button.disabled = true;
+    
+    try {
+        // Hash password for security
+        const hashedPassword = await MAP_UTILS.sha256(password.value);
+
+        const formData = {
+            user: username.value,
+            pw: hashedPassword
+        };
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', MAP_CONFIG.API_ENDPOINTS.login, true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                // Re-enable form fields
+                username.disabled = false;
+                password.disabled = false;
+                button.disabled = false;
+
+                if (xhr.status === 200) {
+                    const data = JSON.parse(xhr.responseText);
+                    const token = data.token;
+                    sessionStorage.setItem('token', token);
+                    logindialog.close();
+                    notyf.success('Login successful');
+                    initializeEditorInterface();
+                } else {
+                    notyf.error('Login failed. Please try again.');
+                    console.error('Failed to login');
+                }
+            }
+        };
+
+        xhr.send(JSON.stringify(formData));
+    } catch (error) {
+        console.error('Login error:', error);
+        username.disabled = false;
+        password.disabled = false;
+        button.disabled = false;
+        notyf.error('Login error: ' + error.message);
+    }
+}
+
+/**
+ * Initializes the editor interface after successful login
+ */
+function initializeEditorInterface() {
+    // Create toggle mode button control
     L.button_toggle_mode = L.Control.extend({
         options: {
             name: 'Toggle Edit Mode',
@@ -53,7 +158,7 @@ function editorInit() {
             html: '<span class="fas fa-eye"></span>', // Default icon for viewing mode
             callback: toggleEditMode
         },
-        onAdd: function (map) {
+        onAdd: function(map) {
             var container = L.DomUtil.create('div', 'leaflet-control leaflet-bar'),
                 link = L.DomUtil.create('a', '', container);
 
@@ -61,7 +166,7 @@ function editorInit() {
             link.title = this.options.name;
             link.innerHTML = this.options.html;
             L.DomEvent.on(link, 'click', L.DomEvent.stop)
-                .on(link, 'click', function () {
+                .on(link, 'click', function() {
                     this.options.callback.call();
                 }, this);
 
@@ -69,14 +174,15 @@ function editorInit() {
         }
     });
 
+    // Create save button control
     L.button_save_all = L.Control.extend({
         options: {
             name: 'Save All',
             position: 'topleft',
             html: '<span class="fas fa-save"></span>',
-            callback: saveAll
+            callback: saveAllLocations
         },
-        onAdd: function (map) {
+        onAdd: function(map) {
             var container = L.DomUtil.create('div', 'leaflet-control leaflet-bar'),
                 link = L.DomUtil.create('a', '', container);
 
@@ -86,7 +192,7 @@ function editorInit() {
             link.style.opacity = '0.5';
             link.style.pointerEvents = 'none';
             L.DomEvent.on(link, 'click', L.DomEvent.stop)
-                .on(link, 'click', function () {
+                .on(link, 'click', function() {
                     this.options.callback.call();
                 }, this);
 
@@ -94,13 +200,14 @@ function editorInit() {
         }
     });
 
+    // Create logout button control
     L.button_logout = L.Control.extend({
         options: {
             name: 'Log Out',
             position: 'topleft',
             html: '<span class="fas fa-sign-out-alt"></span>',
         },
-        onAdd: function (map) {
+        onAdd: function(map) {
             var container = L.DomUtil.create('div', 'leaflet-control leaflet-bar'),
                 link = L.DomUtil.create('a', '', container);
 
@@ -108,7 +215,7 @@ function editorInit() {
             link.title = this.options.name;
             link.innerHTML = this.options.html;
             L.DomEvent.on(link, 'click', L.DomEvent.stop)
-                .on(link, 'click', function () {
+                .on(link, 'click', function() {
                     sessionStorage.removeItem('token');
                     location.reload();
                 }, this);
@@ -117,6 +224,7 @@ function editorInit() {
         }
     });
 
+    // Add the controls to the map
     button_toggle_mode = new L.button_toggle_mode();
     button_save_all = new L.button_save_all();
     button_logout = new L.button_logout();
@@ -124,109 +232,15 @@ function editorInit() {
     map.addControl(button_save_all);
     map.addControl(button_logout);
     
-    // Set up markers but start in viewing mode
+    // Set up marker dragging functionality
     makeMarkersMovable();
     
     notyf.success('Locations are locked. Click the eye icon to switch to editing mode.');
 }
 
-function checkToken() {
-    const xhr = new XMLHttpRequest();
-    xhr.open('GET', '/locations/checktoken', true);
-    xhr.setRequestHeader('X-Token', sessionStorage.getItem('token'));
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === XMLHttpRequest.DONE) {
-            if (xhr.status === 200) {
-                console.log('Token valid');
-                editorInit();
-            } else {
-                console.error('Token invalid');
-                sessionStorage.removeItem('token');
-                notyf.error('Session expired. Please login again.');
-            }
-        }
-    };
-
-    xhr.send();
-}
-
-// thanks chatgpt
-async function login() {
-    const username = document.getElementById('user');
-    const password = document.getElementById('pw');
-    const button = document.getElementById('loginButton');
-    const errorDiv = document.getElementById('loginError');
-
-    username.disabled = true;
-    password.disabled = true;
-    button.disabled = true;
-    const hashedPassword = await sha256(password.value);
-
-    const formData = {
-        user: username.value,
-        pw: hashedPassword
-    };
-
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', '/locations/login', true);
-    xhr.setRequestHeader('Content-Type', 'application/json');
-
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === XMLHttpRequest.DONE) {
-            username.disabled = false;
-            password.disabled = false;
-            button.disabled = false;
-
-            if (xhr.status === 200) {
-                const data = JSON.parse(xhr.responseText);
-                const token = data.token;
-                sessionStorage.setItem('token', token);
-                console.log('Token:', token);
-                logindialog.close();
-                notyf.success('Login successful');
-                editorLogin();
-            } else {
-                notyf.error('Login failed. Please try again.');
-                console.error('Failed to login');
-            }
-        }
-    };
-
-    xhr.send(JSON.stringify(formData));
-}
-
-async function sha256(message) {
-    const msgBuffer = new TextEncoder().encode(message);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-    return hashHex;
-}
-
-async function saveLocation(location) {
-    return new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open('POST', '/locations/save', true);
-        xhr.setRequestHeader('Content-Type', 'application/json');
-        xhr.setRequestHeader('X-Token', sessionStorage.getItem('token'));
-
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState === XMLHttpRequest.DONE) {
-                if (xhr.status === 200) {
-                    notyf.success('Location saved successfully');
-                    resolve(JSON.parse(xhr.responseText));
-                } else {
-                    notyf.error('Failed to save location');
-                    reject(new Error('Failed to save location'));
-                }
-            }
-        };
-
-        xhr.send(JSON.stringify(location));
-    });
-}
-
-// Function to toggle between viewing and editing modes
+/**
+ * Toggles between editing and viewing modes
+ */
 function toggleEditMode() {
     isEditingMode = !isEditingMode;
     
@@ -245,41 +259,38 @@ function toggleEditMode() {
     }
 }
 
-// Helper function to iterate over all location markers across all layer groups
+/**
+ * Applies a callback function to all location markers across all layer groups
+ * @param {Function} callback - Function to call for each marker
+ * @returns {number} Number of markers processed
+ */
 function forEachLocationMarker(callback) {
     let count = 0;
     
-    // Iterate through all layers in the map
-    Object.values(map._layers).forEach(function(layer) {
-        // Check if this is a layer group (not the base tile layer)
-        if (layer instanceof L.LayerGroup && !(layer instanceof L.TileLayer)) {
-            // Skip the base layer
-            if (layer._url && layer._url.includes('tiles/base')) {
-                return;
+    // Process all layer groups
+    Object.values(MAP_CONFIG.LAYER_GROUPS).forEach(function(layerGroup) {
+        layerGroup.eachLayer(function(marker) {
+            if (marker.options && marker.options.location_data) {
+                callback(marker);
+                count++;
             }
-            
-            // Process each marker in the layer group
-            layer.eachLayer(function(marker) {
-                if (marker.options && marker.options.location_data) {
-                    callback(marker);
-                    count++;
-                }
-            });
-        }
+        });
     });
     
     return count;
 }
 
-// Initialize markers with event listeners but keep dragging disabled by default
+/**
+ * Sets up markers with event listeners but keeps dragging disabled by default
+ */
 function makeMarkersMovable() {
-    console.log("Setting up markers...");
+    console.log("Setting up markers for editing...");
     
-    const markerCount = forEachLocationMarker(function(layer) {
+    const markerCount = forEachLocationMarker(function(marker) {
         // Add event listener for when dragging ends (only once)
-        if (!layer._hasSetupDragend) {
-            layer._hasSetupDragend = true;
-            layer.on('dragend', function(event) {
+        if (!marker._hasSetupDragend) {
+            marker._hasSetupDragend = true;
+            marker.on('dragend', function(event) {
                 const marker = event.target;
                 const position = marker.getLatLng();
                 
@@ -302,7 +313,7 @@ function makeMarkersMovable() {
         }
         
         // Start with dragging disabled (viewing mode)
-        layer.dragging.disable();
+        marker.dragging.disable();
     });
 
     if (markerCount === 0) {
@@ -314,28 +325,61 @@ function makeMarkersMovable() {
     }
 }
 
-// Enable dragging for all markers
+/**
+ * Enables dragging for all markers
+ */
 function enableMarkerDragging() {
     console.log("Enabling marker dragging...");
-    forEachLocationMarker(function(layer) {
-        layer.dragging.enable();
+    forEachLocationMarker(function(marker) {
+        marker.dragging.enable();
     });
 }
 
-// Disable dragging for all markers
+/**
+ * Disables dragging for all markers
+ */
 function disableMarkerDragging() {
     console.log("Disabling marker dragging...");
-    forEachLocationMarker(function(layer) {
-        layer.dragging.disable();
+    forEachLocationMarker(function(marker) {
+        marker.dragging.disable();
     });
 }
 
-async function saveAll() {
+/**
+ * Saves a single location to the server
+ * @param {Object} location - The location data to save
+ * @returns {Promise} Promise resolving to the server response
+ */
+async function saveLocation(location) {
+    return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', MAP_CONFIG.API_ENDPOINTS.saveLocation, true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.setRequestHeader('X-Token', sessionStorage.getItem('token'));
+
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status === 200) {
+                    resolve(JSON.parse(xhr.responseText));
+                } else {
+                    reject(new Error(xhr.responseText || 'Failed to save location'));
+                }
+            }
+        };
+
+        xhr.send(JSON.stringify(location));
+    });
+}
+
+/**
+ * Saves all edited locations
+ */
+async function saveAllLocations() {
     // Get only the moved locations from the map
     const locationsToSave = [];
-    forEachLocationMarker(function(layer) {
-        if (editedLocations.has(layer.options.id)) {
-            locationsToSave.push(layer.options.location_data);
+    forEachLocationMarker(function(marker) {
+        if (editedLocations.has(marker.options.id)) {
+            locationsToSave.push(marker.options.location_data);
         }
     });
 
@@ -395,3 +439,6 @@ async function saveAll() {
         console.error('Save failures:', results.filter(r => !r.success));
     }
 }
+
+// Make editor functions globally available
+window.editorLogin = editorLogin;

@@ -13,7 +13,7 @@ cp -f src/index.html src/favicon.ico dist/
 
 # replacing internal values with short commit id
 sed -i "s/{MAPDEV}/$commit/g" dist/index.html
-sed -i "s/{MAPDEV}/$commit/g" dist/res/map-v2.js
+sed -i "s/{MAPDEV}/$commit/g" dist/res/map-config.js
 
 # renaming existing tiles to match new commit id
 mv -f dist/tiles/base-*  dist/tiles/base-$commit
