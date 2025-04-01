@@ -109,12 +109,13 @@ function createLocationIcon(category) {
 }
 
 /**
- * Adds a location marker to the specified layer
- * @param {L.LayerGroup} layerGroup - The layer group to add the marker to
+ * Adds a location marker to the specified layer, storing category info
+ * @param {L.LayerGroup} layerGroup - The single layer group (allMarkersLayer)
  * @param {Object} location - The location data object
+ * @param {Object} [markerOptions={}] - Additional options for the marker (e.g., { categories: ['key1', 'key2'] })
  * @returns {L.Marker} The created marker
  */
-function addLocationMarker(layerGroup, location) {
+function addLocationMarker(layerGroup, location, markerOptions = {}) {
     // Ensure backward compatibility - if category is missing but icon exists, extract category from icon
     if (!location.category && location.icon) {
         location.category = location.icon.replace('.png', '');
@@ -128,6 +129,9 @@ function addLocationMarker(layerGroup, location) {
     // Generate HTML content for the popup
     location.html = createLocationHTML(location);
     
+    // Determine if markers should be potentially draggable (i.e., if editor code is loaded)
+    const isDraggable = typeof window.editorLogin === 'function';
+
     // Create and add the marker
     const marker = new L.marker(
         location.latlng,
@@ -135,8 +139,9 @@ function addLocationMarker(layerGroup, location) {
             icon: createLocationIcon(location.category),
             opacity: 0.9,
             id: location.id,
-            location_data: location,
-            draggable: false // Markers are not draggable by default
+            location_data: location, // Keep original data attached
+            draggable: isDraggable, // Set based on editor presence
+            categories: markerOptions.categories || [] // Store filter categories
         }
     );
     
@@ -160,64 +165,122 @@ function addLocationMarker(layerGroup, location) {
 }
 
 /**
- * Process a location hash from the URL
+ * Process a location hash from the URL (coordinates or location ID)
  * @param {L.Map} map - The map object
- * @param {Object} layerGroups - Object containing all layer groups
+ * @param {Object} filters - The FILTERS state object from map-config.js
  */
-function processLocationHash(map, layerGroups) {
+function processLocationHash(map, filters) { // Changed layerGroups to filters
     if (!window.location.hash.substring(1)) return;
     
-    const hash = window.location.hash.substring(1);
-    
-    // Handle location coordinates format (e.g., loc:0,0,2)
-    if (hash.toLowerCase().startsWith('loc:')) {
-        const locParts = hash.toLowerCase().split(':')[1].split(',');
-        map.setView([locParts[0], locParts[1]], locParts[2]);
-        return;
-    }
-    
-    // Handle location ID format (e.g., #location-1)
-    Object.values(layerGroups).forEach(layerGroup => {
-        layerGroup.eachLayer(function (layer) {
-            if (layer.options.id == hash) {
-                map.setView(layer.getLatLng());
-                layer.togglePopup();
-            }
+    const hashParts = window.location.hash.substring(1).split('&');
+    const mainHash = hashParts[0];
+    const filterHash = hashParts.find(part => part.startsWith('filters='));
+
+    // 1. Process Filters from Hash (if present)
+    if (filterHash) {
+        const activeFiltersFromHash = filterHash.split('=')[1].split(',');
+        Object.keys(filters).forEach(key => {
+            filters[key].active = activeFiltersFromHash.includes(key);
         });
+        // Update checkboxes in UI
+        const layerControlContainer = document.querySelector('.leaflet-control-layers');
+        if (layerControlContainer) {
+             const checkboxes = layerControlContainer.querySelectorAll('input[type="checkbox"]');
+             checkboxes.forEach(checkbox => {
+                 const labelElement = checkbox.nextElementSibling;
+                 const labelText = labelElement ? labelElement.innerHTML.trim() : '';
+                 const filterKey = Object.keys(filters).find(key => filters[key].label === labelText);
+                 if (filterKey) {
+                     checkbox.checked = filters[filterKey].active;
+                 }
+             });
+        }
+        // Apply filter visibility changes
+        if (typeof window.updateMarkerVisibility === 'function') {
+            window.updateMarkerVisibility();
+        }
+    }
+
+
+    // 2. Process Location/Coordinates Hash
+    if (!mainHash) return;
+
+    // Handle location coordinates format (e.g., #loc:0,0,2)
+    if (mainHash.toLowerCase().startsWith('loc:')) {
+        const locParts = mainHash.toLowerCase().split(':')[1].split(',');
+        if (locParts.length === 3) {
+             map.setView([locParts[0], locParts[1]], locParts[2]);
+        }
+        return; // Don't process ID if it's a location hash
+    }
+
+    // Handle location ID format (e.g., #location-1)
+    // Iterate over the single layer group
+    MAP_CONFIG.allMarkersLayer.eachLayer(function (layer) {
+        if (layer.options.id == mainHash) {
+            // Ensure the marker is visible before opening popup
+            // This requires its category filters to be active
+            const markerCategories = layer.options.categories || [];
+            const isVisible = markerCategories.some(category => filters[category]?.active);
+
+            if (isVisible) {
+                 map.setView(layer.getLatLng());
+                 layer.openPopup(); // Use openPopup for reliability
+            } else {
+                 console.warn(`Location ${mainHash} found but is hidden by current filters.`);
+                 // Optionally, activate the necessary filters? Or just center the map?
+                 map.setView(layer.getLatLng());
+            }
+        }
     });
 }
 
 /**
- * Determine if any popup is currently open
- * @param {Object} layerGroups - Object containing all layer groups
+ * Determine if any popup is currently open on the main marker layer
  * @returns {boolean} True if any popup is open
  */
-function isAnyPopupOpen(layerGroups) {
+function isAnyPopupOpen() { // No longer needs layerGroups argument
     let isOpen = false;
-    Object.values(layerGroups).forEach(layerGroup => {
-        layerGroup.eachLayer(function (layer) {
-            if (layer.getPopup && layer.getPopup().isOpen()) {
-                isOpen = true;
-            }
-        });
+    // Check only the single marker layer
+    MAP_CONFIG.allMarkersLayer.eachLayer(function (layer) {
+        if (layer.getPopup && layer.getPopup().isOpen()) {
+            isOpen = true;
+        }
     });
     return isOpen;
 }
 
 /**
- * Updates hash with current map position
+ * Updates hash with current map position and active filters
  * @param {L.Map} map - The map object
- * @param {Object} layerGroups - Object containing all layer groups
+ * @param {Object} filters - The FILTERS state object from map-config.js
  */
-function updateLocationHash(map, layerGroups) {
-    if (isAnyPopupOpen(layerGroups)) return;
-    
+function updateLocationHash(map, filters) { // Changed layerGroups to filters
+    // Don't update hash if a specific location popup is open (its ID should be the hash)
+    if (isAnyPopupOpen()) return;
+
     const center = map.getCenter();
     const lat = center.lat.toFixed(2);
     const lng = center.lng.toFixed(2);
     const zoom = map.getZoom();
-    
-    setHash(`loc:${lat},${lng},${zoom}`);
+
+    // Get active filter keys
+    const activeFilterKeys = Object.entries(filters)
+                                .filter(([key, value]) => value.active)
+                                .map(([key, value]) => key);
+
+    let hashString = `loc:${lat},${lng},${zoom}`;
+
+    // Add filters to hash if not all are active (to keep URL shorter)
+    const allFilterKeys = Object.keys(filters);
+    if (activeFilterKeys.length < allFilterKeys.length && activeFilterKeys.length > 0) {
+         hashString += `&filters=${activeFilterKeys.join(',')}`;
+    } else if (activeFilterKeys.length === 0) {
+         hashString += `&filters=none`; // Explicitly state no filters active
+    }
+    // If all filters are active, we don't add the filter part
+
+    setHash(hashString);
 }
 
 /**

@@ -16,49 +16,39 @@ async function loadLocations() {
         const data = await response.json();
         
         data.forEach(location => {
-            // Track which layers this location has been added to
-            const addedLayers = new Set();
+            // Determine all relevant filter keys for this location
+            const locationFilterKeys = new Set();
             
-            // Determine which layer group this location belongs to based on its main category
-            let mainLayerKey = 'pois'; // Default to POIs
-            
-            if (location.category && MAP_CONFIG.CATEGORY_MAPPING[location.category]) {
-                mainLayerKey = MAP_CONFIG.CATEGORY_MAPPING[location.category];
-            } else if (location.icon) {
-                // Try to match by icon for backward compatibility
-                const category = location.icon.replace('.png', '');
-                if (MAP_CONFIG.CATEGORY_MAPPING[category]) {
-                    mainLayerKey = MAP_CONFIG.CATEGORY_MAPPING[category];
-                }
+            // Get filter key from main category
+            let mainCategory = location.category;
+            if (!mainCategory && location.icon) { // Backward compatibility
+                 mainCategory = location.icon.replace('.png', '');
             }
-            
-            // Add the location to its main layer group
-            MAP_UTILS.addLocationMarker(MAP_CONFIG.LAYER_GROUPS[mainLayerKey], location);
-            addedLayers.add(mainLayerKey);
-            
-            // Check if location has sublocations with different categories
+            const mainFilterKey = MAP_CONFIG.CATEGORY_MAPPING[mainCategory] || MAP_CONFIG.CATEGORY_MAPPING['default'];
+            if (mainFilterKey) {
+                locationFilterKeys.add(mainFilterKey);
+            }
+
+            // Get filter keys from sublocation categories
             if (Array.isArray(location.sublocs) && location.sublocs.length > 0) {
                 location.sublocs.forEach(subloc => {
                     let sublocCategory = subloc.category;
-                    
-                    // Ensure backward compatibility
-                    if (!sublocCategory && subloc.icon) {
+                    if (!sublocCategory && subloc.icon) { // Backward compatibility
                         sublocCategory = subloc.icon.replace('.png', '');
                     }
-                    
-                    // If sublocation has a valid category that maps to a different layer
-                    if (sublocCategory &&
-                        MAP_CONFIG.CATEGORY_MAPPING[sublocCategory] &&
-                        !addedLayers.has(MAP_CONFIG.CATEGORY_MAPPING[sublocCategory])) {
-                        
-                        const subLayerKey = MAP_CONFIG.CATEGORY_MAPPING[sublocCategory];
-                        
-                        // Add the parent location to this additional layer
-                        MAP_UTILS.addLocationMarker(MAP_CONFIG.LAYER_GROUPS[subLayerKey], location);
-                        addedLayers.add(subLayerKey);
+                    const subFilterKey = MAP_CONFIG.CATEGORY_MAPPING[sublocCategory];
+                    if (subFilterKey) {
+                        locationFilterKeys.add(subFilterKey);
                     }
                 });
             }
+
+            // Add the location marker ONCE to the single layer group
+            // Store the collected filter keys in the marker's options
+            const markerOptions = {
+                categories: Array.from(locationFilterKeys) // Store filter keys
+            };
+            MAP_UTILS.addLocationMarker(MAP_CONFIG.allMarkersLayer, location, markerOptions);
         });
         
         return data;
@@ -88,7 +78,8 @@ function setupMapEvents() {
     
     // Handle map move events - update location hash
     map.on('moveend', function() {
-        MAP_UTILS.updateLocationHash(map, MAP_CONFIG.LAYER_GROUPS);
+        // Pass FILTERS state instead of LAYER_GROUPS for hash update
+        MAP_UTILS.updateLocationHash(map, MAP_CONFIG.FILTERS);
     });
 }
 
@@ -183,8 +174,14 @@ function loadEditor() {
     // Load all resources and track progress
     let loadedCount = 0;
     
+    // First load all CSS and non-PathDrag JS resources
+    const initialResources = editorResources.filter(r => r.type === 'css' || (r.type === 'js' && !r.url.includes('PathDrag')));
+    const pathDragResource = editorResources.find(r => r.url.includes('PathDrag'));
+    const editorJsResource = editorResources.find(r => r.url.includes('map-editor.js'));
+    
+    // Load resources in a specific order to ensure dependencies are ready
     Promise.all(
-        editorResources.map(resource => {
+        initialResources.map(resource => {
             return loadResource(resource.url, resource.type)
                 .then(() => {
                     loadedCount++;
@@ -193,6 +190,30 @@ function loadEditor() {
                 });
         })
     )
+    .then(() => {
+        // Load PathDrag specifically and wait for it to be fully initialized
+        return loadResource(pathDragResource.url, pathDragResource.type)
+            .then(() => {
+                loadedCount++;
+                const percentage = Math.round((loadedCount / editorResources.length) * 100);
+                loadingIndicator.textContent = `Loading editor resources (${percentage}%)...`;
+                
+                // Give some time for PathDrag to initialize
+                return new Promise(resolve => setTimeout(resolve, 200));
+            });
+    })
+    .then(() => {
+        // Load the editor JS last to ensure all dependencies are loaded
+        return loadResource(editorJsResource.url, editorJsResource.type)
+            .then(() => {
+                loadedCount++;
+                const percentage = Math.round((loadedCount / editorResources.length) * 100);
+                loadingIndicator.textContent = `Loading editor resources (${percentage}%)...`;
+                
+                // Give some time for the editor to initialize
+                return new Promise(resolve => setTimeout(resolve, 200));
+            });
+    })
     .then(() => {
         console.log("All editor resources loaded successfully");
         // Remove the loading indicator
@@ -214,6 +235,37 @@ function loadEditor() {
         }, 5000);
     });
 }
+
+/**
+ * Updates the visibility of markers based on the active filters.
+ */
+function updateMarkerVisibility() {
+    const activeFilterKeys = Object.entries(MAP_CONFIG.FILTERS)
+                                .filter(([key, value]) => value.active)
+                                .map(([key, value]) => key);
+
+    MAP_CONFIG.allMarkersLayer.eachLayer(marker => {
+        const markerCategories = marker.options.categories || [];
+        
+        // Check if any of the marker's categories match any active filter key
+        const isVisible = markerCategories.some(category => activeFilterKeys.includes(category));
+
+        if (isVisible) {
+            // Ensure the marker is on the map
+            if (!map.hasLayer(marker)) {
+                map.addLayer(marker);
+            }
+        } else {
+            // Ensure the marker is removed from the map
+            if (map.hasLayer(marker)) {
+                map.removeLayer(marker);
+            }
+        }
+    });
+}
+// Make the function globally accessible so map-config can call it initially
+window.updateMarkerVisibility = updateMarkerVisibility;
+
 
 /**
  * Initialize coordinate prompt mode if needed
@@ -242,12 +294,46 @@ function initialize() {
     
     // Load locations and then process any location hash
     loadLocations().then(() => {
-        MAP_UTILS.processLocationHash(map, MAP_CONFIG.LAYER_GROUPS);
+        // Initial visibility update based on default filters
+        updateMarkerVisibility();
+        // Pass FILTERS state instead of LAYER_GROUPS for hash processing
+        MAP_UTILS.processLocationHash(map, MAP_CONFIG.FILTERS);
     });
     
     // Check if editor should be loaded
     checkEditorMode();
-}
+    // Connect layer control checkboxes to filter state and update function
+    const layerControlContainer = document.querySelector('.leaflet-control-layers');
+    if (layerControlContainer) {
+        const checkboxes = layerControlContainer.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach(checkbox => {
+            // Find the corresponding filter key based on the label text or value
+            const labelElement = checkbox.nextElementSibling; // Assuming label follows input
+            const labelText = labelElement ? labelElement.innerHTML.trim() : '';
+            
+            const filterKey = Object.keys(MAP_CONFIG.FILTERS).find(key =>
+                MAP_CONFIG.FILTERS[key].label === labelText
+            );
 
-// Initialize the map when the document is ready
-docReady(initialize);
+            if (filterKey) {
+                // Set initial checked state based on filter
+                checkbox.checked = MAP_CONFIG.FILTERS[filterKey].active;
+
+                // Add event listener
+                checkbox.addEventListener('change', function() {
+                    MAP_CONFIG.FILTERS[filterKey].active = this.checked;
+                    updateMarkerVisibility();
+                    // Update hash after filter change
+                    MAP_UTILS.updateLocationHash(map, MAP_CONFIG.FILTERS);
+                });
+            } else {
+                console.warn("Could not link checkbox to filter for label:", labelText);
+            }
+        });
+    } else {
+        console.error("Layer control container not found to attach filter listeners.");
+    }
+}
+ 
+ // Initialize the map when the document is ready
+ docReady(initialize);

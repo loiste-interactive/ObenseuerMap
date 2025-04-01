@@ -361,6 +361,25 @@ function toggleEditMode() {
         if (isEditingMode) {
             modeButton.innerHTML = '<span class="fas fa-edit"></span>'; // Edit icon
             notyf.success('Editing mode enabled. You can now move and edit locations.');
+            
+            // Enable all location filters to ensure all markers are visible
+            Object.keys(MAP_CONFIG.FILTERS).forEach(key => MAP_CONFIG.FILTERS[key].active = true);
+            
+            // Update checkboxes in the layer control to reflect all filters being active
+            const layerControlContainer = document.querySelector('.leaflet-control-layers');
+            if (layerControlContainer) {
+                const checkboxes = layerControlContainer.querySelectorAll('input[type="checkbox"]');
+                checkboxes.forEach(checkbox => checkbox.checked = true);
+                
+                // Hide the layer control to prevent users from hiding markers in edit mode
+                layerControlContainer.style.display = 'none';
+            }
+            
+            // Update marker visibility to show all markers
+            if (typeof window.updateMarkerVisibility === 'function') {
+                window.updateMarkerVisibility();
+            }
+            
             enableMarkerDragging();
             updateMarkerClickBehavior();
             
@@ -385,6 +404,12 @@ function toggleEditMode() {
             notyf.success('View mode enabled. Locations are now locked.');
             disableMarkerDragging();
             updateMarkerClickBehavior();
+            
+            // Show the layer control again when returning to view mode
+            const layerControlContainer = document.querySelector('.leaflet-control-layers');
+            if (layerControlContainer) {
+                layerControlContainer.style.display = '';
+            }
             
             // Remove edit mode buttons
             map.removeControl(button_save_all);
@@ -432,14 +457,13 @@ function updateMarkerClickBehavior() {
 function forEachLocationMarker(callback) {
     let count = 0;
     
-    // Process all layer groups
-    Object.values(MAP_CONFIG.LAYER_GROUPS).forEach(function(layerGroup) {
-        layerGroup.eachLayer(function(marker) {
-            if (marker.options && marker.options.location_data) {
-                callback(marker);
-                count++;
-            }
-        });
+    // Process the single marker layer
+    MAP_CONFIG.allMarkersLayer.eachLayer(function(marker) {
+        // Ensure it's a location marker created by our system
+        if (marker.options && marker.options.location_data && marker.options.id) {
+            callback(marker);
+            count++;
+        }
     });
     
     return count;
@@ -478,7 +502,12 @@ function makeMarkersMovable() {
         }
         
         // Start with dragging disabled (viewing mode)
-        marker.dragging.disable();
+        // Check if dragging is initialized before trying to disable it
+        if (marker.dragging) {
+            marker.dragging.disable();
+        } else {
+            console.warn(`Dragging not initialized for marker ${marker.options.id}, will retry later`);
+        }
     });
 
     if (markerCount === 0) {
@@ -1027,19 +1056,44 @@ function saveLocationFromForm() {
             existingMarker.setIcon(MAP_UTILS.createLocationIcon(location.category));
         }
     } else if (isCreatingLocation && tempMarker) {
-        // If we're creating a new location, add it to the appropriate layer
-        let layerKey = 'pois'; // Default to POIs
+        // If we're creating a new location, add it to the single layer
         
-        if (location.category && MAP_CONFIG.CATEGORY_MAPPING[location.category]) {
-            layerKey = MAP_CONFIG.CATEGORY_MAPPING[location.category];
+        // Determine all relevant filter keys for this new location
+        const locationFilterKeys = new Set();
+        const mainFilterKey = MAP_CONFIG.CATEGORY_MAPPING[location.category] || MAP_CONFIG.CATEGORY_MAPPING['default'];
+        if (mainFilterKey) {
+            locationFilterKeys.add(mainFilterKey);
         }
-        
+        if (Array.isArray(location.sublocs) && location.sublocs.length > 0) {
+            location.sublocs.forEach(subloc => {
+                const subFilterKey = MAP_CONFIG.CATEGORY_MAPPING[subloc.category];
+                if (subFilterKey) {
+                    locationFilterKeys.add(subFilterKey);
+                }
+            });
+        }
+
         // Remove temporary marker
         tempMarker.remove();
         tempMarker = null;
-        
-        // Add the real marker
-        MAP_UTILS.addLocationMarker(MAP_CONFIG.LAYER_GROUPS[layerKey], location);
+
+        // Add the real marker to the single layer with category info
+        const markerOptions = {
+            categories: Array.from(locationFilterKeys)
+        };
+        const newMarker = MAP_UTILS.addLocationMarker(MAP_CONFIG.allMarkersLayer, location, markerOptions);
+
+        // Make the new marker movable and apply current mode settings
+        if (newMarker) {
+             makeSingleMarkerMovable(newMarker); // Add dragend listener
+             if (isEditingMode) {
+                 newMarker.dragging.enable(); // Enable dragging if in edit mode
+             } else {
+                 newMarker.dragging.disable(); // Disable if in view mode
+             }
+             // Update click behavior for the new marker
+             updateSingleMarkerClickBehavior(newMarker);
+        }
         
         // Reset creation mode
         isCreatingLocation = false;
@@ -1064,8 +1118,8 @@ function saveLocationFromForm() {
     // Show success message
     notyf.success(`Location "${location.name}" changed`);
     
-    // Update marker click behavior
-    updateMarkerClickBehavior();
+    // No need to call updateMarkerClickBehavior() for all markers here,
+    // as we handled the new marker individually.
 }
 
 // Temporary marker for new location creation
@@ -1220,6 +1274,55 @@ function updateImagePreview(image, previewElement) {
     previewElement.src = imagePath;
     previewElement.style.display = 'inline-block';
 }
+
+// Make editor functions globally available
+/**
+ * Sets up dragend listener for a single marker
+ * @param {L.Marker} marker - The marker to set up
+ */
+function makeSingleMarkerMovable(marker) {
+    if (!marker._hasSetupDragend) {
+        marker._hasSetupDragend = true;
+        marker.on('dragend', function(event) {
+            const movedMarker = event.target;
+            const position = movedMarker.getLatLng();
+            movedMarker.options.location_data.latlng = [position.lat, position.lng];
+            editedLocations.add(movedMarker.options.id);
+            const saveButton = document.querySelector('.leaflet-control.leaflet-bar a[title="Save All"]');
+            if (saveButton) {
+                saveButton.style.opacity = '1';
+                saveButton.style.pointerEvents = 'auto';
+            }
+            console.log(`Marker ${movedMarker.options.id} moved to [${position.lat}, ${position.lng}]`);
+            notyf.success(`Location "${movedMarker.options.location_data.name}" moved`);
+        });
+    }
+}
+
+/**
+ * Updates click behavior for a single marker based on mode
+ * @param {L.Marker} marker - The marker to update
+ */
+function updateSingleMarkerClickBehavior(marker) {
+    marker.off('click'); // Remove existing listeners first
+    if (isEditingMode) {
+        marker.on('click', function() {
+            try {
+                showLocationEditForm(marker.options.location_data);
+                MAP_UTILS.setHash(marker.options.id);
+            } catch (error) {
+                console.error("Error showing edit form:", error);
+                notyf.error("Error showing edit form: " + error.message);
+            }
+        });
+    } else {
+        marker.on('click', function() {
+            MAP_UTILS.setHash(marker.options.id);
+            marker.togglePopup();
+        });
+    }
+}
+
 
 // Make editor functions globally available
 window.editorLogin = editorLogin;
